@@ -1,0 +1,98 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+class HttpServer {
+    - InetAddress address
+    - int port
+    - ServerSocket serverSocket
+    -- Constructors --
+    + HttpServer()
+    + HttpServer(String address, int port)
+    -- Field Methods --
+    + void launch()
+    - void handleRequest()
+    - static HttpRequestMessage ParseRequestMessage(String raw)
+
+}
+
+class TargetHandler {
+    + HttpResponseMessage handle(String method, String target)
+    -- Handler methods --
+}
+
+HttpServer *-- TargetHandler
+
+class HttpClient {
+    - InetAddress hostAddress
+    - int hostPort
+    - Socket socket
+    -- Constructors --
+    + HttpClient()
+    + HttpClient(String hostAddress, int hostPort)
+    -- Field Methods --
+    + void request(HttpRequestMessage request)
+    + void get(String target)
+    + void post(String target)
+    - static HttpResponseMessage ParseResponseMessage(String raw)
+    - void showResponse(HttpResponseMessage response)
+}
+
+class StatusHandler {
+    + HttpResponseMessage statusHandler(HttpResponseMessage msg)
+    -- Handler methods --
+}
+
+HttpClient *-- StatusHandler
+
+abstract class HttpMessage {
+    - String httpVersion
+    - HashMap<String, String> headers
+    - String body
+
+    -- Constructors --
+    HttpMessage()
+    .. and others ..
+    -- Field Methods --
+    - String flatMessage(String startLine)
+    + void addHeader(String key, String val)
+    + void setBody(String body)
+}
+
+class HttpResponseMessage{
+    - int statusCode
+    - String statusText
+    -- Constructors --
+    + HttpResponseMessage(int statusCode)
+    + HttpResponseMessage(int statusCode, String statusText)
+    .. and others ..
+    -- Field methods --
+    + String flatMessage()
+}
+
+class HttpRequestMessage{
+    - String method
+    - String target
+    -- Constructors --
+    + HttpResponseMessage(String method)
+    + HttpResponseMessage(String method, String target)
+    .. and others ..
+    -- Field methods --
+    + String flatMessage()
+    + static String defaultStatusText(int statusCode)
+}
+
+HttpResponseMessage <|-- HttpMessage
+HttpRequestMessage <|-- HttpMessage
+
+HttpServer *-- HttpResponseMessage
+HttpClient *-- HttpRequestMessage
+
+HttpServer - HttpClient : Communicates with
+
+class MessageHelper {
+    + static String readBody(int lenInBytes)
+}
+
+
+@enduml
