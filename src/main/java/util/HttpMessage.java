@@ -29,7 +29,7 @@ public abstract class HttpMessage {
 
     protected String flatMessage(String startLine) {
         StringBuilder sb = new StringBuilder();
-        sb.append(sb);      sb.append("\r\n");
+        sb.append(startLine);      sb.append("\r\n");
         headers.forEach((k, v) -> sb.append("%s: %s\r\n"));
         sb.append("\r\n");
         sb.append(body);

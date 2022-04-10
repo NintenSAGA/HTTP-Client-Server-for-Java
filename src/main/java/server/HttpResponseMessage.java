@@ -8,10 +8,15 @@ public class HttpResponseMessage extends HttpMessage {
     private final int statusCode;
     private final String statusText;
 
-    public HttpResponseMessage(int statusCode) {
+
+    public HttpResponseMessage(int statusCode, String statusText) {
         super();
         this.statusCode = statusCode;
-        this.statusText = defaultStatusText(statusCode);
+        this.statusText = statusText;
+    }
+
+    public HttpResponseMessage(int statusCode) {
+        this(statusCode, defaultStatusText(statusCode));
     }
 
     public String flatMessage() {
