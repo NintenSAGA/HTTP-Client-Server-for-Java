@@ -1,12 +1,13 @@
 package server;
 
 import lombok.Getter;
+import lombok.Setter;
 import util.HttpMessage;
 
 @Getter
 public class HttpResponseMessage extends HttpMessage {
     private final int statusCode;
-    private final String statusText;
+    @Setter private String statusText;
 
 
     public HttpResponseMessage(int statusCode, String statusText) {
@@ -24,6 +25,11 @@ public class HttpResponseMessage extends HttpMessage {
         return flatMessage(startLine);
     }
 
+    @Override
+    public String toString() {
+        return this.flatMessage();
+    }
+
     /**
      * Returning the default status text of the corresponding status code <br/>
      * Referring to <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Status>mdn web docs<a/>
@@ -34,4 +40,6 @@ public class HttpResponseMessage extends HttpMessage {
         // todo: defaultStatusText
         return "Not implemented yet";
     }
+
+
 }

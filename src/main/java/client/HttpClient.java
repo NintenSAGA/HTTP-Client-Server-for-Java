@@ -5,7 +5,6 @@ import server.HttpResponseMessage;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.http.HttpResponse;
 
 public class HttpClient {
     private final InetAddress hostAddress;
@@ -17,7 +16,7 @@ public class HttpClient {
         this.hostAddress = InetAddress.getByName(hostName);
         this.hostPort = hostPort;
         this.socket = new Socket();
-        handler = StatusHandler.get();
+        handler = StatusHandler.getInstance();
     }
 
     /**

@@ -18,21 +18,26 @@ import util.Log;
 public class TargetHandler {
     private static final TargetHandler instance = new TargetHandler();
 
-    final Set<String> supportedMethods;
-    final Map<String, Method> targetToMethod;
+    private final ResponseMessageFactory factory;
+    private final TargetSet targetSet;
+    private final Set<String> supportedMethods;
+    private final Map<String, Method> targetToMethod;
 
     private TargetHandler() {
         Log.debug("Target Handler initializing...");
+        factory = ResponseMessageFactory.getInstance();
+        targetSet = TargetSet.getInstance();
         supportedMethods = new HashSet<>();
         supportedMethods.addAll(Arrays.asList("GET POST".split(" ")));
         targetToMethod = new HashMap<>();
 
         Class<Mapping> mappingClass = Mapping.class;
-        for (Method method : this.getClass().getDeclaredMethods()) {
+        for (Method method : targetSet.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(mappingClass)) {
                 assert checkMethod(method);
-                targetToMethod.put(method.getDeclaredAnnotation(mappingClass).target(), method);
-                Log.debug("%s -> %s".formatted(method.getDeclaredAnnotation(mappingClass).target(), method.getName()));
+                Mapping mapping = method.getDeclaredAnnotation(mappingClass);
+                targetToMethod.put(mapping.value(), method);
+                Log.debug("[%s] %s -> %s".formatted(String.join(", ", mapping.method()), mapping.value(), method.getName()));
             }
         }
     }
@@ -65,7 +70,7 @@ public class TargetHandler {
         return true;
     }
 
-    public static TargetHandler get() {
+    public static TargetHandler getInstance() {
         return instance;
     }
 
@@ -74,31 +79,21 @@ public class TargetHandler {
      * @return Response object
      */
     public HttpResponseMessage handle(HttpRequestMessage msg) {
-        assert (supportedMethods.contains(msg.getMethod()));
+        assert supportedMethods.contains(msg.getMethod());
         Log.debug("Message received, target: " + msg.getTarget());
         try {
             String target = msg.getTarget();
             if (!targetToMethod.containsKey(target)) target = "Missing";
-            return (HttpResponseMessage) targetToMethod.get(target).invoke(this, msg);
+            Method method = targetToMethod.get(target);
+
+            if (Arrays.binarySearch(method.getDeclaredAnnotation(Mapping.class).method(), msg.getMethod()) < 0)
+                return factory.produce405();
+
+            return (HttpResponseMessage) targetToMethod.get(target).invoke(targetSet, msg);
 
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-        return null;
-    }
-
-
-    @Mapping(target = "Missing")
-    private HttpResponseMessage responseOnMis(HttpRequestMessage msg) {
-        Log.debug("Target not found!");
-        // todo
-        return null;
-    }
-
-    @Mapping(target = "/test")
-    private HttpResponseMessage test(HttpRequestMessage msg) {
-        System.err.println("Hi you're calling this method");
-        System.err.println(msg.flatMessage());
         return null;
     }
 }

@@ -29,4 +29,9 @@ public class HttpRequestMessage extends HttpMessage {
         String startLine = "%s %s %s".formatted(getMethod(), getTarget() ,getHttpVersion());
         return flatMessage(startLine);
     }
+
+    @Override
+    public String toString() {
+        return this.flatMessage();
+    }
 }

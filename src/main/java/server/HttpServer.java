@@ -1,13 +1,11 @@
 package server;
 
 import client.HttpRequestMessage;
-import lombok.AllArgsConstructor;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class HttpServer {
     private final static int DEFAULT_BACKLOG = 50;
@@ -20,7 +18,7 @@ public class HttpServer {
     public HttpServer(String hostName, int port) throws IOException {
         this.address = InetAddress.getByName(hostName);
         this.port = port;
-        this.handler = TargetHandler.get();
+        this.handler = TargetHandler.getInstance();
         serverSocket = new ServerSocket(this.port, DEFAULT_BACKLOG, this.address);
     }
 

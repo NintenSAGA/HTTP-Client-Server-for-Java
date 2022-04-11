@@ -6,8 +6,8 @@ public class TestHandler {
 
     @Test
     public void checkTarget() {
-        TargetHandler targetHandler = TargetHandler.get();
-        targetHandler.handle(new HttpRequestMessage("GET", "/test"));
+        TargetHandler targetHandler = TargetHandler.getInstance();
+        System.out.println("Response: " + targetHandler.handle(new HttpRequestMessage("GET", "/test")));;
         targetHandler.handle(new HttpRequestMessage("GET", "/dhqwwidq"));
     }
 }

@@ -10,7 +10,7 @@ public class StatusHandler {
 
     private StatusHandler() {}
 
-    public static StatusHandler get() {
+    public static StatusHandler getInstance() {
         return instance;
     }
 
