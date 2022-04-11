@@ -11,11 +11,13 @@ public class HttpClient {
     private final InetAddress hostAddress;
     private final int hostPort;
     private final Socket socket;
+    private final StatusHandler handler;
 
     public HttpClient(String hostName, int hostPort) throws IOException {
         this.hostAddress = InetAddress.getByName(hostName);
         this.hostPort = hostPort;
         this.socket = new Socket();
+        handler = StatusHandler.get();
     }
 
     /**

@@ -15,10 +15,12 @@ public class HttpServer {
     private final InetAddress address;
     private final int port;
     private final ServerSocket serverSocket;
+    private TargetHandler handler;
 
     public HttpServer(String hostName, int port) throws IOException {
         this.address = InetAddress.getByName(hostName);
         this.port = port;
+        this.handler = TargetHandler.get();
         serverSocket = new ServerSocket(this.port, DEFAULT_BACKLOG, this.address);
     }
 

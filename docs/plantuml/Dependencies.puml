@@ -1,0 +1,57 @@
+@startuml
+abstract class util.HttpMessage
+annotation lombok.AllArgsConstructor
+annotation lombok.Getter
+annotation lombok.NonNull
+annotation lombok.Setter
+class client.HttpClient
+class client.HttpRequestMessage
+class client.StatusHandler
+class java.io.BufferedReader
+class java.io.IOException
+class java.net.InetAddress
+class java.net.ServerSocket
+class java.net.Socket
+class java.net.UnknownHostException
+class java.net.http.HttpResponse
+class java.util.Arrays
+class java.util.HashMap
+class java.util.HashSet
+class lombok.Data
+class lombok.EqualsAndHashCode
+class server.HttpResponseMessage
+class server.HttpServer
+class server.TargetHandler
+class util.MessageHelper
+util.HttpMessage ..> lombok.AllArgsConstructor
+util.HttpMessage ..> lombok.Getter
+util.HttpMessage ..> lombok.NonNull
+util.HttpMessage ..> lombok.Setter
+util.HttpMessage ..> java.util.HashMap
+util.HttpMessage ..> lombok.Data
+client.HttpClient ..> java.io.IOException
+client.HttpClient ..> java.net.InetAddress
+client.HttpClient ..> java.net.Socket
+client.HttpClient ..> java.net.http.HttpResponse
+client.HttpClient ..> server.HttpResponseMessage
+client.HttpRequestMessage --|> util.HttpMessage
+client.HttpRequestMessage ..> lombok.AllArgsConstructor
+client.HttpRequestMessage ..> lombok.Getter
+client.HttpRequestMessage ..> java.util.HashMap
+client.HttpRequestMessage ..> lombok.Data
+client.HttpRequestMessage ..> lombok.EqualsAndHashCode
+client.StatusHandler ..> server.HttpResponseMessage
+server.HttpResponseMessage --|> util.HttpMessage
+server.HttpResponseMessage ..> lombok.Getter
+server.HttpServer ..> lombok.AllArgsConstructor
+server.HttpServer ..> client.HttpRequestMessage
+server.HttpServer ..> java.io.IOException
+server.HttpServer ..> java.net.InetAddress
+server.HttpServer ..> java.net.ServerSocket
+server.HttpServer ..> java.net.Socket
+server.HttpServer ..> java.net.UnknownHostException
+server.TargetHandler ..> java.util.Arrays
+server.TargetHandler ..> java.util.HashSet
+util.MessageHelper ..> java.io.BufferedReader
+util.MessageHelper ..> java.io.IOException
+@enduml
