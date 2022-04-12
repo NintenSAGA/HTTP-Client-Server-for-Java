@@ -82,6 +82,10 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 - [ ] Login System Tests
   - [ ] TBD
 
+### 1.2.x Suggestions
+
+- [ ] Response 和 Request Message Parser所需要进行的操作其实大致相同（只有第一行不一样），也许可以抽象出一个独立的静态方法，再让这两个方法作为该方法的 Decorator
+
 ## 1.3 代码结构图
 
 Updated on Apr 12, 2022
