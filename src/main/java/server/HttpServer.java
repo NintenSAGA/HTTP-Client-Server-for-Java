@@ -34,7 +34,7 @@ public class HttpServer {
      * Should handle each new connection with a new thread
      */
     public void launch() {
-        // todo: main loop
+        // todo: main loop 谭子悦
     }
 
     /**
@@ -43,7 +43,7 @@ public class HttpServer {
      * @param timeOut referring to Socket.setSoTimeout()
      */
     private void handleSocket(Socket socket, boolean longConnection, int timeOut) {
-        // todo request handler
+        // todo request handler 谭子悦
     }
 
     /**
@@ -53,7 +53,7 @@ public class HttpServer {
      * @return HttpRequestMessage object
      */
     private static HttpRequestMessage ParseRequestMessage(String raw) {
-        // todo: ParseRequestMessage
+        // todo: ParseRequestMessage 李佳骏 邱兴驰
         return null;
     }
 }

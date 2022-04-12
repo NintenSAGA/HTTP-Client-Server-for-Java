@@ -35,14 +35,16 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ## 1.2 任务
 
+- [ ] Message Parser: `util.MessageHelper.MessageParser`. 李佳骏 邱兴驰
+
 ### 1.2.1 Http Server
 
-- [ ] Main loop: `HttpServer.launch`
-- [ ] Socket Handler: `HttpServer.handleSocket`
+- [ ] Main loop: `HttpServer.launch` 谭子悦
+- [ ] Socket Handler: `HttpServer.handleSocket` 谭子悦
   - [ ] Short connection
   - [ ] Long connection
-- [ ] Http Request Message Parser: `HttpServer.ParseRequestMessage`
-- [ ] MIME types:
+- [ ] Http Request Message Parser: `HttpServer.ParseRequestMessage. 李佳骏 邱兴驰
+- [ ] MIME types: 谭子悦
   - [x] Plain text
   - [ ] Type 2: TBD
   - [ ] Type 3: TBD
@@ -50,20 +52,20 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.2 Http Client
 
-- [ ] Request Methods
+- [ ] Request Methods    徐浩钦
   - [ ] Custom request (debug only): `HttpClientrequest(HttpRequestMessage request)`
   - [ ] GET request
   - [ ] POST request
-- [ ] Http Response Message Parser: `HttpClient.ParseResponseMessage`
+- [ ] Http Response Message Parser: `HttpClient.ParseResponseMessage` 李佳骏 邱兴驰
 - [ ] Display
   - [ ] GUI
   - [ ] CLI
-- [ ] Status Handler
+- [ ] Status Handler     陈骏
   - [ ] 301 Moved Permanently
   - [ ] 302 Found
   - [ ] 304 Not Modified
 
-### 1.2.3 Login System (Server only)
+### 1.2.3 Login System (Server only) 谭子悦
 
 - [ ] Global Cookie Jar
 - [ ] Verification Code Generator
@@ -74,11 +76,11 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 - [ ] Server Tests
   - [ ] Target Handler Test
   - [ ] MIME Test
-  - [ ] Parser Test
+  - [ ] Parser Test 李佳骏 邱兴驰
   - [ ] Long Connection Test
 - [ ] Client Tests
-  - [ ] Parser Test
-  - [ ] Status Handler Test
+  - [ ] Parser Test 李佳骏 邱兴驰
+  - [ ] Status Handler Test 陈骏
 - [ ] Login System Tests
   - [ ] TBD
 
@@ -135,7 +137,7 @@ test				// ./src/test 测试用例
   - 格式化输出请使用 `“Various texts...”.formatted()`
 - 如需修改 [Public | Protected | Default] [methods | fields]，请先在工作群中汇报
   - Private [methods | fields] 可按需增加
-- JVM默认参数不启用assertion，因此推荐测试时在 ./test/java/CustomTests.java 中编写自己的测试用例
+- JVM默认参数不启用assertion，因此推荐在 ./test/java/CustomTests.java 中编写自己的测试程序
   - 不要随意修改别人的用例
 - 编写不确定或逻辑复杂的部分时，请多写 [Assertions](https://www.geeksforgeeks.org/assertions-in-java/)
 

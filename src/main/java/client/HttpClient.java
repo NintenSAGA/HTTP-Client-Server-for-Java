@@ -30,10 +30,10 @@ public class HttpClient {
      * This method is intended to be used for test and debug only
      */
     public void request(HttpRequestMessage request) {
-        // todo: request
+        // todo: request 徐浩钦
     }
 
-    // todo: other methods...
+    // todo: other methods... 徐浩钦
 
     /**
      * Convert raw string to HttpResponseMessage object <br/>
@@ -42,7 +42,7 @@ public class HttpClient {
      * @return HttpResponseMessage object
      */
     private static HttpResponseMessage ParseResponseMessage(String raw) {
-        // todo: ParseResponseMessage
+        // todo: ParseResponseMessage 李佳骏 邱兴驰
         return null;
     }
 

@@ -1,8 +1,10 @@
+package servertests;
+
 import client.HttpRequestMessage;
 import org.junit.jupiter.api.Test;
 import server.TargetHandler;
 
-public class HandlerTests {
+public class TargetHandlerTest {
 
     @Test
     public void checkTarget() {
