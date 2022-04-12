@@ -31,14 +31,13 @@ public class TargetHandler {
 
         supportedMethods = new HashSet<>();
         try {
-            Class<?> methods = Class.forName("server.TargetSet$Methods");
+            Class<?> methods = Class.forName("util.WebMethods");
             for (Field field : methods.getDeclaredFields())
                 supportedMethods.add(field.getName());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             assert false;
         }
-        supportedMethods.addAll(Arrays.asList("GET POST".split(" ")));
         targetToMethod = new HashMap<>();
 
         Class<Mapping> mappingClass = Mapping.class;
@@ -89,7 +88,7 @@ public class TargetHandler {
         Log.debug("Message received, target: " + msg.getTarget());
 
         try {
-            String target = msg.getTarget();
+            String target = msg.getTarget().split("\\?")[0];
             if (!targetToMethod.containsKey(target)) target = "Missing";
             Method method = targetToMethod.get(target);
 

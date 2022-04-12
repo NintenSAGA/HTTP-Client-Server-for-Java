@@ -30,8 +30,10 @@ public class HttpClient {
      * This method is intended to be used for test and debug only
      */
     public void request(HttpRequestMessage request) {
-
+        // todo: request
     }
+
+    // todo: other methods...
 
     /**
      * Convert raw string to HttpResponseMessage object <br/>

@@ -13,7 +13,7 @@ public class HttpServer {
     private final InetAddress address;
     private final int port;
     private final ServerSocket serverSocket;
-    private TargetHandler handler;
+    private final TargetHandler handler;
 
     public HttpServer(String hostName, int port) throws IOException {
         this.address = InetAddress.getByName(hostName);
@@ -39,10 +39,10 @@ public class HttpServer {
 
     /**
      * Should be packed in a Thread <br/>
-     * Input handler --> TargetHandler --> Output handler <br/>
+     * Socket handler --> TargetHandler --> Output handler <br/>
      * @param timeOut referring to Socket.setSoTimeout()
      */
-    private void handleRequest(Socket socket, boolean longConnection, int timeOut) {
+    private void handleSocket(Socket socket, boolean longConnection, int timeOut) {
         // todo request handler
     }
 

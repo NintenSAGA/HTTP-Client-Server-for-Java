@@ -28,9 +28,10 @@ public abstract class HttpMessage {
     public void addHeader(String key, String val) { headers.put(key, val); }
 
     /**
-     * Set body and calculate content-length automatically
+     * Set body as plain text and calculate content-length automatically
      */
-    public void setBody(String body) {
+    public void setBodyAsPlainText(String body) {
+        headers.put("Content-Type", "text/plain");
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
     }

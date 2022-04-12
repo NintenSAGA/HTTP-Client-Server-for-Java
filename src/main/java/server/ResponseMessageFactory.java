@@ -4,9 +4,6 @@ import util.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A singleton factory <br/>
@@ -46,7 +43,7 @@ public class ResponseMessageFactory {
     private HttpResponseMessage produce301(String[] args) {
         if (args.length < 1) return produce500();
         HttpResponseMessage hrm = new HttpResponseMessage(301);
-        hrm.setBody(args[0]);
+        hrm.addHeader("Location", args[0]);
         return hrm;
     }
 
@@ -56,7 +53,7 @@ public class ResponseMessageFactory {
     private HttpResponseMessage produce302(String[] args) {
         if (args.length < 1) return produce500();
         HttpResponseMessage hrm = new HttpResponseMessage(301);
-        hrm.setBody(args[0]);
+        hrm.addHeader("Location", args[0]);
         return hrm;
     }
 

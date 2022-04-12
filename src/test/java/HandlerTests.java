@@ -2,7 +2,7 @@ import client.HttpRequestMessage;
 import org.junit.jupiter.api.Test;
 import server.TargetHandler;
 
-public class TestHandler {
+public class HandlerTests {
 
     @Test
     public void checkTarget() {
@@ -10,5 +10,7 @@ public class TestHandler {
         System.out.println("Response: " + targetHandler.handle(new HttpRequestMessage("GET", "/test")));;
         System.out.println("Response: " + targetHandler.handle(new HttpRequestMessage("POST", "/test")));;
         System.out.println("Response: " + targetHandler.handle(new HttpRequestMessage("POST", "/utadahikaru")));;
+        System.out.println("Response: " + targetHandler.handle(new HttpRequestMessage("GET", "/moved")));;
+        System.out.println("Response: " + targetHandler.handle(new HttpRequestMessage("GET", "/test?user=fff")));;
     }
 }
