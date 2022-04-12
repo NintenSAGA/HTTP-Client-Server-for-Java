@@ -1,6 +1,7 @@
 package server;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -27,7 +28,16 @@ public class TargetHandler {
         Log.debug("Target Handler initializing...");
         factory = ResponseMessageFactory.getInstance();
         targetSet = TargetSet.getInstance();
+
         supportedMethods = new HashSet<>();
+        try {
+            Class<?> methods = Class.forName("server.TargetSet$Methods");
+            for (Field field : methods.getDeclaredFields())
+                supportedMethods.add(field.getName());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            assert false;
+        }
         supportedMethods.addAll(Arrays.asList("GET POST".split(" ")));
         targetToMethod = new HashMap<>();
 
@@ -52,20 +62,14 @@ public class TargetHandler {
 
         Log.debug("Now checking method [" + method.getName() + "]");
         Class<?>[] methodParams = method.getParameterTypes();
-        if (methodParams.length != METHOD_PARAM.length) {
-            Log.testExpect("Param length", "" + METHOD_PARAM.length, "" + methodParams.length);
+        if (!Log.testExpect("Parm Length", METHOD_PARAM.length, methodParams.length))
             return false;
-        }
         for (int i = 0; i < METHOD_PARAM.length; i++) {
-            if (!methodParams[i].equals(METHOD_PARAM[i])) {
-                Log.testExpect("Param %d".formatted(i), methodParams[i].getName(), METHOD_PARAM[i].getName());
+            if (!Log.testExpect("Param %d".formatted(i), methodParams[i].getName(), METHOD_PARAM[i].getName()))
                 return false;
-            }
         }
-        if (!method.getReturnType().equals(METHOD_RETURN)) {
-            Log.testExpect("Return type", METHOD_RETURN.getName(), method.getReturnType().getName());
+        if (!Log.testExpect("Return type", METHOD_RETURN.getName(), method.getReturnType().getName()))
             return false;
-        }
         Log.debug("Success!");
         return true;
     }
@@ -79,21 +83,24 @@ public class TargetHandler {
      * @return Response object
      */
     public HttpResponseMessage handle(HttpRequestMessage msg) {
-        assert supportedMethods.contains(msg.getMethod());
+        if (!supportedMethods.contains(msg.getMethod()))
+            return factory.produce(405);
+
         Log.debug("Message received, target: " + msg.getTarget());
+
         try {
             String target = msg.getTarget();
             if (!targetToMethod.containsKey(target)) target = "Missing";
             Method method = targetToMethod.get(target);
 
             if (Arrays.binarySearch(method.getDeclaredAnnotation(Mapping.class).method(), msg.getMethod()) < 0)
-                return factory.produce405();
+                return factory.produce(405);
 
             return (HttpResponseMessage) targetToMethod.get(target).invoke(targetSet, msg);
 
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
+            return factory.produce(500);
         }
-        return null;
     }
 }

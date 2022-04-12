@@ -17,7 +17,7 @@ public abstract class HttpMessage {
 
     @NonNull private final String httpVersion;
     @NonNull private final HashMap<String, String> headers;
-    @NonNull @Setter private String body;
+    @NonNull private String body;
 
     public HttpMessage() {
         httpVersion = HTTP11;
@@ -27,10 +27,18 @@ public abstract class HttpMessage {
 
     public void addHeader(String key, String val) { headers.put(key, val); }
 
+    /**
+     * Set body and calculate content-length automatically
+     */
+    public void setBody(String body) {
+        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        this.body = body;
+    }
+
     protected String flatMessage(String startLine) {
         StringBuilder sb = new StringBuilder();
         sb.append(startLine);      sb.append("\r\n");
-        headers.forEach((k, v) -> sb.append("%s: %s\r\n"));
+        headers.forEach((k, v) -> sb.append("%s: %s\r\n".formatted(k, v)));
         sb.append("\r\n");
         sb.append(body);
         return sb.toString();
