@@ -116,7 +116,6 @@ Updated on Apr 12, 2022
 test				// ./src/test 测试用例
 └── java
     ├── CustomTests.java	// 自定义测试类，可自行编写测试
-    └── HandlerTests.java // Handler测试
   	......  // More Tests TBD
 ```
 
