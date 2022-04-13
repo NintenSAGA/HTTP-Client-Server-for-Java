@@ -21,6 +21,7 @@ public class ResponseMessageFactory {
      * <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304>304 Not Modified</a><br/>
      * <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404>404 Not Found</a><br/>
      * <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405>405 Method Not Allowed</a><br/>
+     * <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500>500 Internal Server Error</a>
      */
     public HttpResponseMessage produce(int code, String ... args) {
         try {

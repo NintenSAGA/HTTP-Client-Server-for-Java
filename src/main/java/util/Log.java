@@ -35,6 +35,16 @@ public class Log {
     }
 
     /**
+     * Print log information to stdout with custom prompt<br/>
+     * Format: [prompt]: ...
+     * @param prompt Prompt word
+     */
+    synchronized public static void logPrompt(String prompt, Object ... msg) {
+        System.out.print(PURPLE.apply("%s: ".formatted(prompt)));
+        System.out.println(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining("")));
+    }
+
+    /**
      * Print debug information to stderr. <br/>
      * Format: DEBUG: ...
      * <br/>Enabled when assertion is enabled.
@@ -43,16 +53,17 @@ public class Log {
         debugPrompt("DEBUG", msg);
     }
 
-    public static void debugServer(Object ... msg) {
-        debugPrompt("SERVER", msg);
+    public static void logServer(Object ... msg) {
+        logPrompt("SERVER", msg);
     }
 
-    public static void debugClient(Object ... msg) {
-        debugPrompt("CLIENT", msg);
+    public static void logClient(Object ... msg) {
+        logPrompt("CLIENT", msg);
     }
 
-    public static void debugSocket(Socket socket, Object ... msg) {
-        debugPrompt("SOCKET[%s]".formatted(socket.getRemoteSocketAddress().toString().replace("/", "")), msg);
+    public static void logSocket(Socket socket, Object ... msg) {
+        String prompt = socket.isClosed() ? "null" : socket.getRemoteSocketAddress().toString().replace("/", "");
+        logPrompt("SOCKET[%s]".formatted(prompt), msg);
     }
 
     /**

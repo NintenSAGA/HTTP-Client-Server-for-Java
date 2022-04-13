@@ -33,7 +33,7 @@ public class HttpClient {
      */
     public void request(HttpRequestMessage request) {
         // todo: request 徐浩钦
-        Log.debugClient("Client can print debug message in this way");
+        Log.logClient("Client can print debug message in this way");
     }
 
     // todo: other methods... 徐浩钦

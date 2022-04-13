@@ -32,7 +32,7 @@ public abstract class HttpMessage {
      * Set body as plain text and calculate content-length automatically
      */
     public void setBodyAsPlainText(String body) {
-        headers.put("Content-Type", "text/plain");
+        headers.put("Content-Type", "text/plain; charset=UTF-8");
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
     }

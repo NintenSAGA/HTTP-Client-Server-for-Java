@@ -2,6 +2,8 @@ package server;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONObject;
+import util.Config;
 import util.HttpMessage;
 
 import java.util.Arrays;
@@ -13,17 +15,8 @@ public class HttpResponseMessage extends HttpMessage {
     private static final Map<Integer, String> defaultStatusTextMap;
     static {
         defaultStatusTextMap = new HashMap<>();
-        String raw = """
-                200,OK               \s
-                301,Moved Permanently\s
-                302,Found            \s
-                304,Not Modified     \s
-                404,Not Found        \s
-                405,Method Not Allowed""";
-        Arrays.stream(raw.split("\n")).forEach(s -> {
-            String[] a = s.split(",");
-            defaultStatusTextMap.put(Integer.parseInt(a[0]), a[1]);
-        });
+        JSONObject jsonObject = Config.getConfigAsJsonObj(Config.DEFAULT_STATUS_TEXT);
+        jsonObject.keySet().forEach(k -> defaultStatusTextMap.put(Integer.parseInt(k), jsonObject.getString(k)));
     }
     private final int statusCode;
     @Setter private String statusText;
@@ -41,6 +34,11 @@ public class HttpResponseMessage extends HttpMessage {
     public String flatMessage() {
         String startLine = "%s %s %s".formatted(getHttpVersion(), getStatusCode(), getStatusText());
         return flatMessage(startLine);
+    }
+
+    public void addCookie(String key, String val) {
+        String expr = "%s=%s".formatted(key, val);
+        getHeaders().merge("Set-Cookie", expr, "%s; %s"::formatted);
     }
 
     @Override

@@ -1,0 +1,8 @@
+{
+  "200": "OK",
+  "301": "Moved Permanently",
+  "302": "Found            ",
+  "304": "Not Modified     ",
+  "404": "Not Found        ",
+  "405": "Method Not Allowed"
+}

@@ -67,7 +67,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.3 Login System (Server only) 谭子悦
 
-- [ ] Global Cookie Jar
+- [x] Global Cookie Jar
 - [ ] Verification Code Generator
 - [ ] Temporary User Map
 
