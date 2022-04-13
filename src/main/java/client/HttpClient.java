@@ -1,7 +1,9 @@
 package client;
 
 import server.HttpResponseMessage;
+import util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -31,6 +33,7 @@ public class HttpClient {
      */
     public void request(HttpRequestMessage request) {
         // todo: request 徐浩钦
+        Log.debugClient("Client can print debug message in this way");
     }
 
     // todo: other methods... 徐浩钦
@@ -38,10 +41,10 @@ public class HttpClient {
     /**
      * Convert raw string to HttpResponseMessage object <br/>
      * Referring <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages>Http Message</a>
-     * @param raw raw string from socket input
+     * @param br Buffered reader from requests
      * @return HttpResponseMessage object
      */
-    private static HttpResponseMessage ParseResponseMessage(String raw) {
+    private static HttpResponseMessage ParseResponseMessage(BufferedReader br) {
         // todo: ParseResponseMessage 李佳骏 邱兴驰
         return null;
     }

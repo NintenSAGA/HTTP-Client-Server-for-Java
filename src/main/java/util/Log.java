@@ -19,14 +19,39 @@ public class Log {
         assert enabled = true;
     }
 
+
+
     /**
-     * Method used to print debug information to stderr.
+     * Print debug information to stderr with custom prompt<br/>
+     * Format: [prompt]: ...
+     * <br/>Enabled when assertion is enabled.
+     * @param prompt Prompt word
+     */
+    public static void debugPrompt(String prompt, Object ... msg) {
+        if (!enabled) return;
+        System.err.print(PROMPT.apply("%s: ".formatted(prompt)));
+        System.err.println(BODY.apply(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining(""))));
+    }
+
+    /**
+     * Print debug information to stderr. <br/>
+     * Format: DEBUG: ...
      * <br/>Enabled when assertion is enabled.
      */
     public static void debug(Object ... msg) {
-        if (!enabled) return;
-        System.err.print(PROMPT.apply("DEBUG: "));
-        System.err.println(BODY.apply(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining(""))));
+        debugPrompt("DEBUG", msg);
+    }
+
+    public static void debugServer(Object ... msg) {
+        debugPrompt("SERVER", msg);
+    }
+
+    public static void debugClient(Object ... msg) {
+        debugPrompt("CLIENT", msg);
+    }
+
+    public static void debugSocket(int n, Object ... msg) {
+        debugPrompt("SOCKET[%d]".formatted(n), msg);
     }
 
     /**

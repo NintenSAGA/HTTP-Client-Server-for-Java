@@ -1,7 +1,9 @@
 package server;
 
 import client.HttpRequestMessage;
+import util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -34,7 +36,11 @@ public class HttpServer {
      * Should handle each new connection with a new thread
      */
     public void launch() {
-        // todo: main loop 谭子悦
+        Log.debugServer("The server is starting up....");
+
+        while (true) {
+            Log.debugServer("Now listening for ");
+        }
     }
 
     /**
@@ -49,10 +55,10 @@ public class HttpServer {
     /**
      * Convert raw string to HttpRequestMessage object <br/>
      * Referring <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages>Http Message</a>
-     * @param raw raw string from socket input
+     * @param br Buffered reader from handleSocket
      * @return HttpRequestMessage object
      */
-    private static HttpRequestMessage ParseRequestMessage(String raw) {
+    private static HttpRequestMessage ParseRequestMessage(BufferedReader br) {
         // todo: ParseRequestMessage 李佳骏 邱兴驰
         return null;
     }
