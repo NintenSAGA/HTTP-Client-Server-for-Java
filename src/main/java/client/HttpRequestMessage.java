@@ -7,6 +7,7 @@ import lombok.Getter;
 import util.HttpMessage;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 public class HttpRequestMessage extends HttpMessage {
@@ -19,7 +20,7 @@ public class HttpRequestMessage extends HttpMessage {
         this.target = target;
     }
 
-    public HttpRequestMessage(String method, String target, String httpVersion, HashMap<String, String> headers, String body) {
+    public HttpRequestMessage(String method, String target, String httpVersion, Map<String, String> headers, String body) {
         super(httpVersion, headers, body);
         this.method = method;
         this.target = target;

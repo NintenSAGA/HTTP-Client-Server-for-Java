@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @AllArgsConstructor
 @Getter
@@ -16,7 +17,7 @@ public abstract class HttpMessage {
     static final String HTTP20 = "HTTP/2";
 
     @NonNull private final String httpVersion;
-    @NonNull private final HashMap<String, String> headers;
+    @NonNull private final Map<String, String> headers;
     @NonNull private String body;
 
     public HttpMessage() {

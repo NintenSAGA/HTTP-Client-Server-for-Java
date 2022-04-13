@@ -44,6 +44,6 @@ class TargetSet {
 
     @Mapping(value = "/moved", method = WebMethods.GET)
     HttpResponseMessage moved(HttpRequestMessage msg) {
-        return factory.produce(301, "www.baidu.com");
+        return factory.produce(301, "/test");
     }
 }

@@ -1,5 +1,6 @@
 package util;
 
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ public class Log {
      * <br/>Enabled when assertion is enabled.
      * @param prompt Prompt word
      */
-    public static void debugPrompt(String prompt, Object ... msg) {
+    synchronized public static void debugPrompt(String prompt, Object ... msg) {
         if (!enabled) return;
         System.err.print(PROMPT.apply("%s: ".formatted(prompt)));
         System.err.println(BODY.apply(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining(""))));
@@ -50,8 +51,8 @@ public class Log {
         debugPrompt("CLIENT", msg);
     }
 
-    public static void debugSocket(int n, Object ... msg) {
-        debugPrompt("SOCKET[%d]".formatted(n), msg);
+    public static void debugSocket(Socket socket, Object ... msg) {
+        debugPrompt("SOCKET[%s]".formatted(socket.getRemoteSocketAddress().toString().replace("/", "")), msg);
     }
 
     /**

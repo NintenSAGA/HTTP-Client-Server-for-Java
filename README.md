@@ -39,10 +39,10 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.1 Http Server
 
-- [ ] Main loop: `HttpServer.launch` 谭子悦
-- [ ] Socket Handler: `HttpServer.handleSocket` 谭子悦
-  - [ ] Short connection
-  - [ ] Long connection
+- [x] Main loop: `HttpServer.launch` 谭子悦
+- [x] Socket Handler: `HttpServer.handleSocket` 谭子悦
+  - [x] Short connection
+  - [x] Long connection
 - [ ] Http Request Message Parser: `HttpServer.ParseRequestMessage. 李佳骏 邱兴驰
 - [ ] MIME types: 谭子悦
   - [x] Plain text

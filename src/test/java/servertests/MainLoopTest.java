@@ -6,6 +6,7 @@ import util.Log;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
@@ -17,7 +18,11 @@ public class MainLoopTest {
 
     @Test
     public void mainLoopTest() {
-        Log.debugServer("你爸爸来啦");
-
+        try {
+            HttpServer httpServer = new HttpServer();
+            httpServer.launch(true, 10000);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
