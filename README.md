@@ -67,7 +67,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.3 Login System (Server only) 谭子悦
 
-- [x] Global Cookie Jar
+- [x] Global Header Map
 - [ ] Verification Code Generator
 - [ ] Temporary User Map
 
@@ -144,3 +144,5 @@ test				// ./src/test 测试用例
 - 请不要从任何地方 (StackOverflow, GitHub, etc.) 直接复制代码到本项目中
 
 - 填写复用纯文本 (如 `GET`, `HTTP/1.1`) 前，先检查项目中是否已定义对应常量，若无，可考虑增加该常量类
+
+- 配置参数可以存为json文件放在`main/resources`下，将文件路径作为常量存在`util.Config`中，并用`util.Config`中的方法读取
