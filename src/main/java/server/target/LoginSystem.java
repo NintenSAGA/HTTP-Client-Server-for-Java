@@ -37,7 +37,6 @@ public class LoginSystem extends TargetSet {
     private static final ConcurrentMap<String, User> userMap;
     private static final ConcurrentMap<String, String> keyToName;
     private static final String authKey = "Catherine";
-
     static {
         userMap = new ConcurrentHashMap<>();
         keyToName = new ConcurrentHashMap<>();

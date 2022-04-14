@@ -45,8 +45,8 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
   - [x] Long connection
 - [ ] Http Request Message Parser: `HttpServer.ParseRequestMessage. 李佳骏 邱兴驰
 - [ ] MIME types: 谭子悦
-  - [x] Plain text
-  - [ ] Type 2: TBD
+  - [x] Type 1: text/plain
+  - [ ] Type 2: text/html
   - [ ] Type 3: TBD
 - [x] Target Handler
 

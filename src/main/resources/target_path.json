@@ -1,3 +1,3 @@
 {
-  "server.target": ["LoginSystem", "Common"]
+  "server.target": ["LoginSystem", "Common", "Html"]
 }
