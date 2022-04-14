@@ -3,6 +3,7 @@ package server;
 import client.HttpRequestMessage;
 import org.json.JSONObject;
 import util.Config;
+import util.HttpMessage;
 import util.Log;
 import util.MessageHelper;
 
@@ -35,7 +36,7 @@ public class HttpServer {
     private final TargetHandler handler;
     private final Map<String, String> globalHeaders;
 
-    private AtomicBoolean alive;
+    private final AtomicBoolean alive;
 
     public HttpServer(String hostName, int port) throws IOException {
         this.address = InetAddress.getByName(hostName);
@@ -122,7 +123,7 @@ public class HttpServer {
                 HttpRequestMessage requestMessage;
                 try {
                     requestMessage = temporaryParser(br);
-                    Log.debug(requestMessage.flatMessage());
+                    Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
                     HttpResponseMessage responseMessage = handler.handle(requestMessage);
                     pw.print(packUp(responseMessage));
                     pw.flush();
@@ -177,7 +178,6 @@ public class HttpServer {
     private HttpResponseMessage packUp(HttpResponseMessage msg) {
         msg.getHeaders().putAll(this.globalHeaders);
         msg.addHeader("Date", MessageHelper.getTime());
-        Log.debug(msg.flatMessage());
         return msg;
     }
 

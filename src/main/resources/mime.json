@@ -1,0 +1,11 @@
+{
+  "text": {
+    "default" : "plain",
+    "html"    : "html",
+    "css"     : "css"
+  },
+
+  "application": {
+    "js"      : "javascript"
+  }
+}

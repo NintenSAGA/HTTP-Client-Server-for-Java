@@ -13,6 +13,7 @@ import client.HttpRequestMessage;
 import org.json.JSONObject;
 import server.target.TargetSet;
 import util.Config;
+import util.HttpMessage;
 import util.Log;
 
 /**
@@ -96,12 +97,21 @@ public class TargetHandler {
     public HttpResponseMessage handle(HttpRequestMessage msg) {
         if (!supportedMethods.contains(msg.getMethod()))
             return factory.produce(405);
-
-        Log.debug("Message received, target: " + msg.getTarget());
+        if (!msg.getHttpVersion().equals(HttpMessage.HTTP11))
+            return factory.produce(505);
 
         try {
             String target = msg.getTarget().split("\\?")[0];
-            if (!targetToMethod.containsKey(target)) target = "Missing";
+            if (!targetToMethod.containsKey(target)) {
+                String path = "static_html" + target;
+                if (ClassLoader.getSystemClassLoader().getResource(path) == null)
+                    target = "Missing";
+                else {
+                    HttpResponseMessage hrm = factory.produce(200);
+                    hrm.setBodyAsFile(path);
+                    return hrm;
+                }
+            }
             Method method = targetToMethod.get(target);
 
             if (Arrays.binarySearch(method.getDeclaredAnnotation(Mapping.class).method(), msg.getMethod()) < 0)

@@ -46,7 +46,7 @@ public class LoginSystem extends TargetSet {
      * Validate the login status
      * @return authCode if valid, or null
      */
-    static private String checkStatus(HttpRequestMessage msg) {
+    private static String checkStatus(HttpRequestMessage msg) {
         Map<String, String> cookies = msg.getCookies();
         String code;
         if (cookies == null || (code = cookies.get("authCode")) == null || keyToName.get(code) == null)
@@ -59,7 +59,7 @@ public class LoginSystem extends TargetSet {
      * @return new authCode
      * @throws LoginException containing exception message
      */
-    static private String login(String name, String password) throws LoginException {
+    private static String login(String name, String password) throws LoginException {
         User user = userMap.get(name);
         if (user == null)
             throw new LoginException("Invalid user name");
@@ -77,7 +77,7 @@ public class LoginSystem extends TargetSet {
     }
 
     @Mapping(value = "/status")
-    static synchronized HttpResponseMessage status(HttpRequestMessage msg) {
+    public static synchronized HttpResponseMessage status(HttpRequestMessage msg) {
         HttpResponseMessage hrm = factory.produce(200);
         String code;
         if ((code = checkStatus(msg)) == null) {
@@ -90,7 +90,7 @@ public class LoginSystem extends TargetSet {
     }
 
     @Mapping(value = "/login", method = {WebMethods.GET})
-    static synchronized HttpResponseMessage login(HttpRequestMessage msg) {
+    public static synchronized HttpResponseMessage login(HttpRequestMessage msg) {
         Map<String, String> args = parseArgs(msg.getTarget());
         HttpResponseMessage hrm = factory.produce(200);
         try {
@@ -108,7 +108,7 @@ public class LoginSystem extends TargetSet {
     }
 
     @Mapping(value = "/logout")
-    static synchronized HttpResponseMessage logout(HttpRequestMessage msg) {
+    public static synchronized HttpResponseMessage logout(HttpRequestMessage msg) {
         HttpResponseMessage hrm = factory.produce(200);
         String code = checkStatus(msg);
         if (code == null)
@@ -121,7 +121,7 @@ public class LoginSystem extends TargetSet {
     }
 
     @Mapping(value = "/register", method = {WebMethods.POST})
-    static synchronized HttpResponseMessage register(HttpRequestMessage msg) {
+    public static synchronized HttpResponseMessage register(HttpRequestMessage msg) {
         try {
             Map<String, String> argMap = parseArgs(msg.getTarget());
             if (argMap == null) throw new NullPointerException();
