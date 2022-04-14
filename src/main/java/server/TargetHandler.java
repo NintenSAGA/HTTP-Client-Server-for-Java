@@ -1,6 +1,5 @@
 package server;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,6 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 import client.HttpRequestMessage;
+import org.json.JSONObject;
+import server.target.TargetSet;
+import util.Config;
 import util.Log;
 
 /**
@@ -20,14 +22,12 @@ public class TargetHandler {
     private static final TargetHandler instance = new TargetHandler();
 
     private final ResponseMessageFactory factory;
-    private final TargetSet targetSet;
     private final Set<String> supportedMethods;
     private final Map<String, Method> targetToMethod;
 
     private TargetHandler() {
         Log.debug("Target Handler initializing...");
         factory = ResponseMessageFactory.getInstance();
-        targetSet = TargetSet.getInstance();
 
         supportedMethods = new HashSet<>();
         try {
@@ -40,15 +40,27 @@ public class TargetHandler {
         }
         targetToMethod = new HashMap<>();
 
+        JSONObject json = Config.getConfigAsJsonObj(Config.TARGET_PATH);
         Class<Mapping> mappingClass = Mapping.class;
-        for (Method method : targetSet.getClass().getDeclaredMethods()) {
-            if (method.isAnnotationPresent(mappingClass)) {
-                assert checkMethod(method);
-                Mapping mapping = method.getDeclaredAnnotation(mappingClass);
-                targetToMethod.put(mapping.value(), method);
-                Log.debug("[%s] %s -> %s".formatted(String.join(", ", mapping.method()), mapping.value(), method.getName()));
+
+        try {
+            for (String prefix : json.keySet()) {
+                for (Object className : json.getJSONArray(prefix).toList()) {
+                    Class<?> targetClass = Class.forName("%s.%s".formatted(prefix, className));
+                    for (Method method : targetClass.getDeclaredMethods()) {
+                        if (method.isAnnotationPresent(mappingClass)) {
+                            assert checkMethod(method);
+                            Mapping mapping = method.getDeclaredAnnotation(mappingClass);
+                            targetToMethod.put(mapping.value(), method);
+                            Log.debug("[%s] %s -> %s".formatted(String.join(", ", mapping.method()), mapping.value(), method.getName()));
+                        }
+                    }
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     /**
@@ -95,7 +107,7 @@ public class TargetHandler {
             if (Arrays.binarySearch(method.getDeclaredAnnotation(Mapping.class).method(), msg.getMethod()) < 0)
                 return factory.produce(405);
 
-            return (HttpResponseMessage) targetToMethod.get(target).invoke(targetSet, msg);
+            return (HttpResponseMessage) targetToMethod.get(target).invoke(null, msg);
 
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();

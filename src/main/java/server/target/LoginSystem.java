@@ -1,8 +1,10 @@
-package server;
+package server.target;
 
 import client.HttpRequestMessage;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import server.HttpResponseMessage;
+import server.Mapping;
 import util.Log;
 import util.MessageHelper;
 import util.WebMethods;
@@ -10,19 +12,13 @@ import util.WebMethods;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
-/**
- * Singleton container of target mapping methods
- */
-class TargetSet {
+public class LoginSystem extends TargetSet {
     @AllArgsConstructor
-    private class User {
+    private static class User {
         @NonNull String name; @NonNull String password;
 
         String authCodeEncrypt() throws NoSuchAlgorithmException {
@@ -33,47 +29,25 @@ class TargetSet {
     }
 
     private static class LoginException extends Exception {
-
         public LoginException(String message) {
             super(message);
         }
     }
 
-    private static final TargetSet instance = new TargetSet();
-    private final ResponseMessageFactory factory;
-    static TargetSet getInstance(){ return instance; }
+    private static final ConcurrentMap<String, User> userMap;
+    private static final ConcurrentMap<String, String> keyToName;
+    private static final String authKey = "Catherine";
 
-    private final ConcurrentMap<String, User> userMap;
-    private final ConcurrentMap<String, String> keyToName;
-    private final String authKey = "Catherine";
-
-    private TargetSet() {
-        factory = ResponseMessageFactory.getInstance();
+    static {
         userMap = new ConcurrentHashMap<>();
         keyToName = new ConcurrentHashMap<>();
-    }
-
-    private Map<String, String> parseArgs(String target) {
-        int st = 0;
-        while ( st < target.length() && target.charAt(st) != '?' ) st++;
-        if (st == target.length()) return null;
-
-        String argStr = target.substring(st + 1);
-        try {
-            return Arrays.stream(argStr.split("\\&"))
-                            .map(s -> s.split("="))
-                            .collect(Collectors.toMap(a -> a[0], a->a[1]));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     /**
      * Validate the login status
      * @return authCode if valid, or null
      */
-    private String checkStatus(HttpRequestMessage msg) {
+    static private String checkStatus(HttpRequestMessage msg) {
         Map<String, String> cookies = msg.getCookies();
         String code;
         if (cookies == null || (code = cookies.get("authCode")) == null || keyToName.get(code) == null)
@@ -86,7 +60,7 @@ class TargetSet {
      * @return new authCode
      * @throws LoginException containing exception message
      */
-    private String login(String name, String password) throws LoginException {
+    static private String login(String name, String password) throws LoginException {
         User user = userMap.get(name);
         if (user == null)
             throw new LoginException("Invalid user name");
@@ -104,7 +78,7 @@ class TargetSet {
     }
 
     @Mapping(value = "/status")
-    synchronized HttpResponseMessage status(HttpRequestMessage msg) {
+    static synchronized HttpResponseMessage status(HttpRequestMessage msg) {
         HttpResponseMessage hrm = factory.produce(200);
         String code;
         if ((code = checkStatus(msg)) == null) {
@@ -117,7 +91,7 @@ class TargetSet {
     }
 
     @Mapping(value = "/login", method = {WebMethods.GET})
-    synchronized HttpResponseMessage login(HttpRequestMessage msg) {
+    static synchronized HttpResponseMessage login(HttpRequestMessage msg) {
         Map<String, String> args = parseArgs(msg.getTarget());
         HttpResponseMessage hrm = factory.produce(200);
         try {
@@ -135,7 +109,7 @@ class TargetSet {
     }
 
     @Mapping(value = "/logout")
-    synchronized HttpResponseMessage logout(HttpRequestMessage msg) {
+    static synchronized HttpResponseMessage logout(HttpRequestMessage msg) {
         HttpResponseMessage hrm = factory.produce(200);
         String code = checkStatus(msg);
         if (code == null)
@@ -148,7 +122,7 @@ class TargetSet {
     }
 
     @Mapping(value = "/register", method = {WebMethods.POST})
-    synchronized HttpResponseMessage register(HttpRequestMessage msg) {
+    static synchronized HttpResponseMessage register(HttpRequestMessage msg) {
         try {
             Map<String, String> argMap = parseArgs(msg.getTarget());
             if (argMap == null) throw new NullPointerException();
@@ -176,25 +150,5 @@ class TargetSet {
             e.printStackTrace();
             return factory.produce(400);
         }
-    }
-
-
-    @Mapping(value = "Missing", method = {WebMethods.GET, WebMethods.POST})
-    HttpResponseMessage responseOnMis(HttpRequestMessage msg) {
-        Log.debug("Target not found!");
-        // todo
-        return factory.produce(404);
-    }
-
-    @Mapping(value = "/test", method = WebMethods.GET)
-    HttpResponseMessage test(HttpRequestMessage msg) {
-        HttpResponseMessage hrm = factory.produce(200);
-        hrm.setBodyAsPlainText("逐梦演艺圈");
-        return hrm;
-    }
-
-    @Mapping(value = "/moved", method = WebMethods.GET)
-    HttpResponseMessage moved(HttpRequestMessage msg) {
-        return factory.produce(301, "/test");
     }
 }

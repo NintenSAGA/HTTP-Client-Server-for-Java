@@ -8,8 +8,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class Config {
-    public final static String GLOBAL_HEADERS = "global_headers.json";
-    public final static String DEFAULT_STATUS_TEXT = "default_status_text.json";
+    public final static String GLOBAL_HEADERS       = "global_headers.json";
+    public final static String DEFAULT_STATUS_TEXT  = "default_status_text.json";
+    public final static String TARGET_PATH          = "target_path.json";
 
     public static InputStream getConfigAsStream(String config) {
         InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream(config);
