@@ -36,6 +36,11 @@ public class HttpResponseMessage extends HttpMessage {
         return flatMessage(startLine);
     }
 
+    public byte[] flatMessageToBinary() {
+        String startLine = "%s %s %s".formatted(getHttpVersion(), getStatusCode(), getStatusText());
+        return flatMessageToBinary(startLine);
+    }
+
     public void addCookie(String key, String val) {
         String expr = "%s=%s".formatted(key, val);
         getHeaders().merge("Set-Cookie", expr, "%s; %s"::formatted);

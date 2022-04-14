@@ -18,6 +18,19 @@ public class Config {
     public final static String TARGET_PATH          = "target_path.json";
     public final static String MIME                 = "mime.json";
 
+    public static byte[] getResourceAsByteArray(String resource) {
+        URL url = ClassLoader.getSystemClassLoader().getResource(resource);
+        assert url != null: "Wrong path!";
+        try {
+            Path path = Path.of(url.toURI());
+            return Files.readAllBytes(path);
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+            assert false;
+            return new byte[]{ 0 };
+        }
+    }
+
     public static String getResourceAsString(String resource) {
         URL url = ClassLoader.getSystemClassLoader().getResource(resource);
         assert url != null: "Wrong path!";

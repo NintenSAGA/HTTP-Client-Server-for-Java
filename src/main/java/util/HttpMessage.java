@@ -4,13 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public abstract class HttpMessage {
     public static final String HTTP10 = "HTTP/1";
@@ -21,6 +23,7 @@ public abstract class HttpMessage {
 
     @Data
     private static class MediaType {
+        private final static String[] BINARY_TYPE = new String[]{ "image" };
         @NonNull String type;
         @NonNull String subtype;
         @Override
@@ -42,22 +45,36 @@ public abstract class HttpMessage {
     @NonNull private final String httpVersion;
     @NonNull private final Map<String, String> headers;
     @NonNull private String body;
+    private byte[] binaryBody;
 
     public HttpMessage() {
         httpVersion = HTTP11;
         headers = new HashMap<>();
         body = "";
+        binaryBody = null;
+    }
+
+    public boolean isBodyBinary() {
+        return binaryBody != null;
     }
 
     public void addHeader(String key, String val) { headers.put(key, val); }
 
     public void setBodyAsFile(String path) {
-        String content = Config.getResourceAsString(path);
         String[] a = path.split("\\.");
         String suffix = a[a.length - 1];
         MediaType mediaType = suffixToMime.getOrDefault(suffix, suffixToMime.get("default"));
-        headers.put("Content-Type", "%s; charset=UTF-8".formatted(mediaType));
         Log.debug("File %s sent as %s".formatted(path, mediaType));
+        for (String prefix : MediaType.BINARY_TYPE)
+            if (mediaType.toString().startsWith(prefix) && !mediaType.toString().equals("image/svg+xml")) {
+                binaryBody = Config.getResourceAsByteArray(path);
+                headers.put("Content-Type", "%s".formatted(mediaType));
+                headers.put("Content-Length", "%d".formatted(binaryBody.length));
+                return;
+            }
+
+        headers.put("Content-Type", "%s; charset=UTF-8".formatted(mediaType));
+        String content = Config.getResourceAsString(path);
         setBodyWithChunked(content);
     }
 
@@ -106,5 +123,17 @@ public abstract class HttpMessage {
         sb.append("\r\n");
         sb.append(body);
         return sb.toString();
+    }
+
+    protected byte[] flatMessageToBinary(String startLine) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(startLine);      sb.append("\r\n");
+        headers.forEach((k, v) -> sb.append("%s: %s\r\n".formatted(k, v)));
+        sb.append("\r\n");
+        byte[] a = sb.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] ret = Arrays.copyOf(a, a.length + binaryBody.length);
+        System.arraycopy(binaryBody, 0, ret, a.length, binaryBody.length);
+
+        return ret;
     }
 }

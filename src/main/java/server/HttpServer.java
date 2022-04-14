@@ -10,12 +10,14 @@ import util.MessageHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -118,6 +120,7 @@ public class HttpServer {
                     new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(
                     new OutputStreamWriter(socket.getOutputStream()));
+            OutputStream outputStream = socket.getOutputStream();
 
             do {
                 HttpRequestMessage requestMessage;
@@ -125,8 +128,13 @@ public class HttpServer {
                     requestMessage = temporaryParser(br);
                     Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
                     HttpResponseMessage responseMessage = handler.handle(requestMessage);
-                    pw.print(packUp(responseMessage));
-                    pw.flush();
+                    if (responseMessage.isBodyBinary()) {
+                        outputStream.write(packUp(responseMessage).flatMessageToBinary());
+                        outputStream.flush();
+                    } else {
+                        pw.print(packUp(responseMessage));
+                        pw.flush();
+                    }
                 } catch (SocketTimeoutException e) {
                     Log.logSocket(socket, "Socket timeout");
                     longConnection = false;
@@ -139,7 +147,7 @@ public class HttpServer {
             } while (longConnection);
 
             Log.logSocket(socket, "Connection closed");
-            br.close(); pw.close();
+            br.close(); pw.close(); outputStream.close();
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();

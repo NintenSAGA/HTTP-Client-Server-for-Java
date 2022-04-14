@@ -40,14 +40,38 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 ### 1.2.1 Http Server
 
 - [x] Main loop: `HttpServer.launch` 谭子悦
+
 - [x] Socket Handler: `HttpServer.handleSocket` 谭子悦
   - [x] Short connection
   - [x] Long connection
+  
 - [ ] Http Request Message Parser: `HttpServer.ParseRequestMessage. 李佳骏 邱兴驰
-- [ ] MIME types: 谭子悦
-  - [x] Type 1: text/plain
-  - [x] Type 2: text/html | css | application/javascript
-  - [ ] Type 3: 
+
+- [x] MIME types: 谭子悦
+  ```json
+  {
+    "text": {
+      "default" : "plain",
+      "html"    : "html",
+      "css"     : "css"
+    },
+  
+    "application": {
+      "js"      : "javascript"
+    },
+  
+    "image": {
+      "jpeg"    : "jpeg",
+      "jpg"     : "jpeg",
+      "png"     : "png",
+      "gif"     : "gif",
+      "svg"     : "svg+xml"
+    }
+  }
+  ```
+  
+  
+  
 - [x] Target Handler
 
 ### 1.2.2 Http Client
@@ -86,7 +110,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.x Suggestions
 
-- [ ] Response 和 Request Message Parser所需要进行的操作其实大致相同（只有第一行不一样），也许可以抽象出一个独立的静态方法，再让这两个方法作为该方法的 Decorator
+- [x] Response 和 Request Message Parser所需要进行的操作其实大致相同（只有第一行不一样），也许可以抽象出一个独立的静态方法，再让这两个方法作为该方法的 Decorator
 
 ## 1.3 代码结构图
 
