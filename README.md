@@ -68,8 +68,8 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 ### 1.2.3 Login System (Server only) 谭子悦
 
 - [x] Global Header Map
-- [ ] Verification Code Generator
-- [ ] Temporary User Map
+- [x] Verification Code Generator
+- [x] Temporary User Map
 
 ### 1.2.4 Test Cases
 

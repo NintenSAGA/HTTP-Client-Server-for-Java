@@ -2,8 +2,18 @@ package util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class MessageHelper {
+    private static final SimpleDateFormat sdf;
+    static {
+        sdf = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z", Locale.ENGLISH);
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     /**
      * Read body with fixed Content-Length (in bytes) <br/>
@@ -27,5 +37,19 @@ public class MessageHelper {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Get the current time in GMT format
+     */
+    public static String getTime() {
+        return sdf.format(Calendar.getInstance().getTime());
+    }
+
+    /**
+     * Get the current time in GMT format
+     */
+    public static String getTime(Calendar cal) {
+        return sdf.format(cal.getTime());
     }
 }

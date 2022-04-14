@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import util.HttpMessage;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,15 @@ public class HttpRequestMessage extends HttpMessage {
     public String flatMessage() {
         String startLine = "%s %s %s".formatted(getMethod(), getTarget() ,getHttpVersion());
         return flatMessage(startLine);
+    }
+
+    public Map<String, String> getCookies() {
+        if (!getHeaders().containsKey("Cookie")) return null;
+        Map<String, String> cookies = new HashMap<>();
+        Arrays.stream(getHeaders().get("Cookie").split("; "))
+                .map(expr -> expr.split("="))
+                .forEach(a -> cookies.put(a[0], a[1]));
+        return cookies;
     }
 
     @Override

@@ -34,7 +34,6 @@ public class HttpServer {
     private final ServerSocket serverSocket;
     private final TargetHandler handler;
     private final Map<String, String> globalHeaders;
-    private final SimpleDateFormat sdf;
 
     private AtomicBoolean alive;
 
@@ -44,8 +43,6 @@ public class HttpServer {
         this.handler = TargetHandler.getInstance();
         this.serverSocket = new ServerSocket(this.port, DEFAULT_BACKLOG, this.address);
         this.globalHeaders = new HashMap<>();
-        this.sdf = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z", Locale.ENGLISH);
-        this.sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
         this.alive = new AtomicBoolean(true);
 
         JSONObject jsonObject = Config.getConfigAsJsonObj(Config.GLOBAL_HEADERS);
@@ -179,7 +176,7 @@ public class HttpServer {
      */
     private HttpResponseMessage packUp(HttpResponseMessage msg) {
         msg.getHeaders().putAll(this.globalHeaders);
-        msg.addHeader("Date", sdf.format(new Date()));
+        msg.addHeader("Date", MessageHelper.getTime());
         Log.debug(msg.flatMessage());
         return msg;
     }
