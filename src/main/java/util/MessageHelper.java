@@ -1,12 +1,13 @@
 package util;
 
+import client.HttpRequestMessage;
+import server.HttpResponseMessage;
+
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
 public class MessageHelper {
     private static final SimpleDateFormat sdf;
@@ -38,6 +39,41 @@ public class MessageHelper {
         }
         return sb.toString();
     }
+    /**
+     * message parser method.
+     * @param br
+     * @param isReqOrRes isReqOrRes: true:request false:response
+     * @return httpMessage
+     */
+    public static HttpMessage messageParser(BufferedReader br,boolean isReqOrRes) throws IOException{
+        String messageLine = br.readLine();
+        if (messageLine == null) throw new SocketTimeoutException();
+        //处理报文第一行 开始行含有三个部分
+        String[] startLine = messageLine.split(" ");
+        assert startLine.length == 3;
+
+        //用哈希表，处理首部行 字段名：值
+        Map<String,String> headers = new HashMap<>();
+        while (!(messageLine = br.readLine()).isEmpty()){
+            //每一个首部行
+            String[] header = messageLine.split(":");
+            assert header.length == 2;
+            String key = header[0],val = header[1];
+            headers.put(key,val);
+        }
+        //处理实体主体
+        String body = "";
+        if (headers.containsKey("Content-Length"))
+            body = MessageHelper.readBody(br, Integer.parseInt(headers.get("Content-Length")));
+
+
+        if (isReqOrRes) {
+            return new HttpRequestMessage(startLine[0],startLine[1],startLine[2],headers,body);
+        }else {
+            return new HttpResponseMessage(Integer.parseInt(startLine[1]),startLine[2]);
+        }
+    }
+
 
     /**
      * Get the current time in GMT format
