@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import util.Config;
 import util.HttpMessage;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,12 @@ public class HttpResponseMessage extends HttpMessage {
 
     public HttpResponseMessage(int statusCode, String statusText) {
         super();
+        this.statusCode = statusCode;
+        this.statusText = statusText;
+    }
+
+    public HttpResponseMessage(int statusCode, String statusText, String httpVersion, Map<String, String> headers, String body) {
+        super(httpVersion, headers, body);
         this.statusCode = statusCode;
         this.statusText = statusText;
     }
