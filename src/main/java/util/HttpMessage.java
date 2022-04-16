@@ -79,6 +79,7 @@ public abstract class HttpMessage {
         MediaType mediaType = suffixToMime.getOrDefault(suffix, suffixToMime.get("default"));
         Log.debug("File %s sent as %s".formatted(path, mediaType));
         if (MediaType.BINARY_TYPE.contains(mediaType)) {
+            Log.debug(mediaType, " is binary");
             binaryBody = Config.getResourceAsByteArray(path);
             headers.put("Content-Type", "%s".formatted(mediaType));
             headers.put("Content-Length", "%d".formatted(binaryBody.length));
@@ -87,7 +88,7 @@ public abstract class HttpMessage {
 
         headers.put("Content-Type", "%s; charset=UTF-8".formatted(mediaType));
         String content = Config.getResourceAsString(path);
-        setBodyWithChunked(content);
+        setBodyWithContentLength(content);
     }
 
     /**
@@ -95,18 +96,16 @@ public abstract class HttpMessage {
      */
     public void setBodyAsPlainText(String body) {
         headers.put("Content-Type", "text/plain; charset=UTF-8");
-        if (body.length() <= CHUNK_SIZE)
-            setBodyWithContentLength(body);
-        else
-            setBodyWithChunked(body);
+        setBodyWithContentLength(body);
     }
 
     public void setBodyAsHTML(String body) {
         headers.put("Content-Type", "text/html; charset=UTF-8");
-        setBodyWithChunked(body);
+        setBodyWithContentLength(body);
     }
 
     protected void setBodyWithContentLength(String body) {
+        Log.debug("Content-Length: ", body.getBytes().length >>> 10, "KB" );
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
     }

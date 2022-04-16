@@ -8,51 +8,48 @@ import util.Log;
 import util.MessageHelper;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousServerSocketChannel;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HttpServer {
-    private final static int        DEFAULT_BACKLOG = 50;
     private final static boolean    DEFAULT_LONG_CONNECTION = false;
-    private final static int        DEFAULT_TIMEOUT = 10000;
+    private final static int        DEFAULT_TIMEOUT         = 10000;
+    private final static int        TRANSPORT_CHUNK_SIZE    = 1 << 10;
 
-    private final InetAddress address;
-    private final int port;
-    private final ServerSocket serverSocket;
+//    private final ServerSocket serverSocket;
+    private final AsynchronousServerSocketChannel aServerSocket;
     private final TargetHandler handler;
     private final Map<String, String> globalHeaders;
 
     private final AtomicBoolean alive;
 
     public HttpServer(String hostName, int port) throws IOException {
-        this.address = InetAddress.getByName(hostName);
-        this.port = port;
         this.handler = TargetHandler.getInstance();
-        this.serverSocket = new ServerSocket(this.port, DEFAULT_BACKLOG, this.address);
+        this.aServerSocket = AsynchronousServerSocketChannel.open();
+        this.aServerSocket.bind(new InetSocketAddress(hostName, port));
         this.globalHeaders = new HashMap<>();
         this.alive = new AtomicBoolean(true);
 
         JSONObject jsonObject = Config.getConfigAsJsonObj(Config.GLOBAL_HEADERS);
         Log.debug(jsonObject.toString());
         jsonObject.keySet().forEach(k -> this.globalHeaders.put(k, jsonObject.getString(k)));
-
-        this.serverSocket.setSoTimeout(1000);
     }
 
     /**
@@ -72,17 +69,40 @@ public class HttpServer {
         Log.logServer("The server is starting up....");
 
         try {
-            while (alive.get()) {
-                try {
-                    Socket socket = serverSocket.accept();
-                    CompletableFuture.runAsync(() -> handleSocket(socket, longConnection, timeOut));
-                } catch (SocketTimeoutException ignored) { }
+            while (true) {
+                aServerSocket.accept(null, new CompletionHandler<>() {
+
+                    @Override
+                    public void completed(AsynchronousSocketChannel result, Object attachment) {
+                        if (aServerSocket.isOpen())
+                            aServerSocket.accept(null, this);
+                        handleSocket(result, longConnection, timeOut);
+                    }
+
+                    @Override
+                    public void failed(Throwable exc, Object attachment) {
+
+                    }
+                });
+                System.in.read();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Log.logServer("The server is down");
+//        try {
+//            while (alive.get()) {
+//                try {
+//                    a.se
+//                    Socket socket = serverSocket.accept();
+//                    CompletableFuture.runAsync(() -> handleSocket(socket, longConnection, timeOut));
+//                } catch (SocketTimeoutException ignored) { }
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        Log.logServer("The server is down");
     }
 
     /**
@@ -100,59 +120,69 @@ public class HttpServer {
     public void shutdown() {
         this.alive.set(false);
         Log.logServer("The server is going to shut down...");
+        try {
+            aServerSocket.close();
+        } catch (IOException ignored) {
+
+        } finally {
+            Log.logServer("The server is down");
+        }
     }
 
     /**
      * Should be packed in a Thread <br/>
      * Socket handler --> TargetHandler --> Output handler <br/>
      */
-    private void handleSocket(Socket socket, boolean longConnection, int timeOut) {
+    private void handleSocket(AsynchronousSocketChannel socket, boolean longConnection, int timeOut) {
         Log.logSocket(socket, "Accepted");
         try {
-            if ("keep-alive".equals(globalHeaders.get("Connection")))
-                socket.setKeepAlive(true);  // Keep Alive
-
             assert timeOut > 0;
-            socket.setSoTimeout(timeOut);
             Log.logSocket(socket, "Long connection %sabled with timout %d".formatted(longConnection ? "en" : "dis", timeOut));
 
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream()));
-            PrintWriter pw = new PrintWriter(
-                    new OutputStreamWriter(socket.getOutputStream()));
-            OutputStream outputStream = socket.getOutputStream();
+            ByteBuffer inputByteBuffer = ByteBuffer.allocate(1 << 20);
+            BufferedReader br = null;
 
             do {
+                Log.debug("A new loop~");
                 HttpRequestMessage requestMessage;
+                ByteBuffer ans;
                 try {
+                    Future<Integer> future = socket.read(inputByteBuffer);
+                    future.get(timeOut, TimeUnit.MILLISECONDS);
+                    br = new BufferedReader(
+                            new InputStreamReader(new ByteArrayInputStream(inputByteBuffer.array())));
                     requestMessage = temporaryParser(br);
+                    inputByteBuffer.clear();
+
                     Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
-//                    Log.logSocket(socket, "-------------- Message data --------------\n"
-//                            + requestMessage.flatMessage()
-//                            + "\n-------------- Message data --------------");
                     HttpResponseMessage responseMessage = handler.handle(requestMessage);
                     if (responseMessage.isBodyBinary()) {
-                        outputStream.write(packUp(responseMessage).flatMessageToBinary());
-                        outputStream.flush();
+                        ans = ByteBuffer.wrap(packUp(responseMessage).flatMessageToBinary());
                     } else {
-                        pw.print(packUp(responseMessage));
-                        pw.flush();
+                        ans = ByteBuffer.wrap(packUp(responseMessage).flatMessage().getBytes());
                     }
-                } catch (SocketTimeoutException e) {
+
+                    int written, chunk = TRANSPORT_CHUNK_SIZE;
+                    for (written = 0; written < ans.limit(); ) {
+                        written += socket.write(ans.slice(written, Math.min(ans.limit() - written, chunk))).get();
+                    }
+                    Log.logSocket(socket,"Response sent %f KB ".formatted((double) written / chunk));
+                    Log.testExpect("Bytes sent", ans.limit(), written);
+                } catch (TimeoutException | ExecutionException e) {
                     Log.logSocket(socket, "Socket timeout");
                     longConnection = false;
                 } catch (Exception e) {
                     e.printStackTrace();
-                    pw.write(packUp(internalError()).flatMessage());
-                    pw.flush();
+                    ans = ByteBuffer.wrap(packUp(internalError()).flatMessage().getBytes());
+                    socket.write(ans).get();
                     longConnection = false;
                 }
             } while (longConnection);
 
             Log.logSocket(socket, "Connection closed");
-            br.close(); pw.close(); outputStream.close();
+            if (br != null) br.close();
             socket.close();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
@@ -166,7 +196,7 @@ public class HttpServer {
         String line = br.readLine();
         if (line == null) throw new SocketTimeoutException();
         String[] start = line.split(" ");
-        assert start.length == 3;
+        assert start.length == 3 : start;
 
         Map<String, String> headers = new HashMap<>();
         String body = "";

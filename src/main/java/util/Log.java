@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.channels.AsynchronousSocketChannel;
 import java.util.Arrays;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -97,8 +98,24 @@ public class Log {
         logPrompt("CLIENT", msg);
     }
 
-    public static void logSocket(Socket socket, Object ... msg) {
-        String prompt = socket.isClosed() ? "null" : socket.getRemoteSocketAddress().toString().replace("/", "");
+    public static void logSocket(AsynchronousSocketChannel socket, Object ... msg) {
+        String prompt;
+        try {
+            prompt = socket.isOpen() ? socket.getRemoteAddress().toString().replace("/", "") : "null";
+        } catch (IOException e) {
+            prompt = "null";
+        }
+        logPrompt("SOCKET[%s]".formatted(prompt), msg);
+    }
+
+    synchronized public static void logSocketLoading(AsynchronousSocketChannel socket, Object ... msg) {
+        String prompt;
+        try {
+            prompt = socket.isOpen() ? socket.getRemoteAddress().toString().replace("/", "") : "null";
+        } catch (IOException e) {
+            prompt = "null";
+        }
+        out.print("\r");
         logPrompt("SOCKET[%s]".formatted(prompt), msg);
     }
 
@@ -120,10 +137,10 @@ public class Log {
      * <br/>Enabled when assertion is enabled.
      * @param prompt prompt word
      */
-    public static void showExpectDiff(String prompt, String exp, String act) {
+    public static void showExpectDiff(String prompt, Object exp, Object act) {
         if (!enabled) return;
         err.print(PROMPT.apply(prompt + ": "));
-        err.println(BODY.apply("Expected: %s\tActual: %s%n".formatted(exp, act)));
+        err.println(BODY.apply("Expected: %s\tActual: %s%n".formatted(exp.toString(), act.toString())));
     }
 
     public static void discardErr() throws FileNotFoundException {

@@ -5,10 +5,14 @@ import util.Config;
 import util.Log;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -17,6 +21,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
 
 public class CustomTests {
 
@@ -48,14 +53,19 @@ public class CustomTests {
     }
 
     @Test
-    public void customPicTest() {
-        try {
-            byte[] b = Files.readAllBytes(Path.of(ClassLoader.getSystemClassLoader().getResource("./static_html/static_files/cute_rabbit.jpeg").toURI()));
-            System.out.println(Base64.getEncoder().encodeToString(b));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void customNio2Test() throws IOException, ExecutionException, InterruptedException {
+        var socket = AsynchronousServerSocketChannel.open();
+        socket.bind(new InetSocketAddress("127.0.0.1", 8080));
+        var future = socket.accept();
+        var s = future.get();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1 << 20);
+        s.read(byteBuffer);
+        byteBuffer.flip();
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new ByteArrayInputStream(byteBuffer.array()))
+        );
+        for (String line; !(line = bufferedReader.readLine()).isEmpty(); ) {
+            System.out.println(line);
         }
     }
 }

@@ -63,6 +63,5 @@ public class LoginSystemTests {
     @AfterAll
     static void cleanUp() throws ExecutionException, InterruptedException {
         server.shutdown();
-        future.get();
     }
 }

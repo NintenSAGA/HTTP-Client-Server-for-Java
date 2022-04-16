@@ -55,7 +55,6 @@ public class RequestTest {
     @AfterAll
     static void cleanUp() throws ExecutionException, InterruptedException, IOException {
         server.shutdown();
-        future.get();
         br.close();
     }
 }
