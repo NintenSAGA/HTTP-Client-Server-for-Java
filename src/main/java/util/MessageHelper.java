@@ -49,11 +49,11 @@ public class MessageHelper {
     }
     /**
      * message parser method.
-     * @param br
-     * @param isReqOrRes isReqOrRes: true:request false:response
+     * @param br Buffered reader from handleSocket
+     * @param isReq isReq: true:request false:response
      * @return httpMessage
      */
-    public static HttpMessage messageParser(BufferedReader br,boolean isReqOrRes) throws IOException{
+    public static HttpMessage messageParser(BufferedReader br, boolean isReq) throws IOException{
         String messageLine = br.readLine();
         if (messageLine == null) throw new SocketTimeoutException();
         //处理报文第一行 开始行含有三个部分
@@ -75,10 +75,16 @@ public class MessageHelper {
             body = MessageHelper.readBody(br, Integer.parseInt(headers.get("Content-Length")));
 
 
-        if (isReqOrRes) {
+        if (isReq) {
             return new HttpRequestMessage(startLine[0],startLine[1],startLine[2],headers,body);
         }else {
-            return new HttpResponseMessage(Integer.parseInt(startLine[1]),startLine[2]);
+            HttpMessage httpResponseMessage = new HttpResponseMessage(Integer.parseInt(startLine[1]),startLine[2]);
+            if (headers.containsValue("chunked")){
+                String newBody = "";
+                int contentLen = 0;
+                String[] strings = body.split("\r\n");
+            }
+            return httpResponseMessage;
         }
     }
 

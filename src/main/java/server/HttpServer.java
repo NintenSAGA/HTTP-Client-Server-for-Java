@@ -228,8 +228,9 @@ public class HttpServer {
      * @param br Buffered reader from handleSocket
      * @return HttpRequestMessage object
      */
-    private static HttpRequestMessage ParseRequestMessage(BufferedReader br) {
+    private static HttpRequestMessage ParseRequestMessage(BufferedReader br) throws IOException {
         // todo: ParseRequestMessage 李佳骏 邱兴驰
-        return null;
+        HttpMessage httpRequestMessage = MessageHelper.messageParser(br,true);
+        return (HttpRequestMessage) httpRequestMessage;
     }
 }
