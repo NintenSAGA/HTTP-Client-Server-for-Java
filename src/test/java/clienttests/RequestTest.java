@@ -3,6 +3,7 @@ package clienttests;
 import client.HttpClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import server.HttpServer;
 import util.Log;
@@ -37,14 +38,16 @@ public class RequestTest {
 
 
     @Test
+    @DisplayName("GET Method test")
     public void getTest() throws IOException {
         new HttpClient().get("/test", null);
         assertEquals("HTTP/1.1 200 OK", br.readLine());
     }
 
     @Test
+    @DisplayName("POST Method test")
     public void postTest() throws IOException {
-        new HttpClient().post("/register", "?name=hhh&password=996", null);
+        new HttpClient().post("/register", "name=hhh&password=996", null);
         assertEquals("HTTP/1.1 201 Created", br.readLine());
     }
 

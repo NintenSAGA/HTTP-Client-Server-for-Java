@@ -46,44 +46,44 @@ public class HttpClient {
     /**
      * HTTP GET method
      * @param target    target, e.g.: /path/to/file
-     * @param param     parameters, e.g.: ?user=sega&password=123
+     * @param param     parameters, e.g.: user=sega&password=123
      * @param headers   headers, one expression per String, e.g.: "User-Agent: AbaAba/0.1".
      */
-    public void get(String target, String param, String ... headers) throws IOException {
-        HttpRequestMessage hrm = new HttpRequestMessage(WebMethods.GET, target + (param == null ? "" : param));
-        request(hrm, headers);
+    public HttpResponseMessage get(String target, String param, String ... headers) throws IOException {
+        HttpRequestMessage hrm = new HttpRequestMessage(WebMethods.GET, target + (param == null ? "" : "?" + param));
+        return request(hrm, headers);
     }
 
     /**
      * HTTP POST method<br/>
      * Only support ascii body with Content-Length
      * @param target    target, e.g.: /path/to/file
-     * @param param     parameters, e.g.: ?user=sega&password=123
+     * @param param     parameters, e.g.: user=sega&password=123
      * @param body      plain text body. Use null for empty body (and param as application/x-www-form-urlencoded)
      * @param headers   headers, one expression per String, e.g.: "User-Agent: AbaAba/0.1".
      */
-    public void post(String target, String param, String body, String ... headers) throws IOException {
+    public HttpResponseMessage post(String target, String param, String body, String ... headers) throws IOException {
         HttpRequestMessage hrm;
         if (body == null) {
             hrm = new HttpRequestMessage(WebMethods.POST, target);
-            if (param != null && param.charAt(0) == '?')
-                hrm.setBodyAsFormUrlencoded(param.substring(1));
+            if (param != null)
+                hrm.setBodyAsFormUrlencoded(param);
         } else {
-            hrm = new HttpRequestMessage(WebMethods.POST, target + (param == null ? "" : param));
+            hrm = new HttpRequestMessage(WebMethods.POST, target + (param == null ? "" : "?" + param));
             hrm.setBodyAsPlainText(body);
         }
-        request(hrm, headers);
+        return request(hrm, headers);
     }
 
-    private void request(HttpRequestMessage request, String ... headers) throws IOException {
+    private HttpResponseMessage request(HttpRequestMessage request, String ... headers) throws IOException {
         for (String header : headers) {
             String[] pair = header.split(": ");
             request.addHeader(pair[0], pair[1]);
         }
-        request(request);
+        return request(request);
     }
 
-    private void request(HttpRequestMessage request) throws IOException {
+    private HttpResponseMessage request(HttpRequestMessage request) throws IOException {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
             try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()))) {
                 pw.print(request.flatMessage());

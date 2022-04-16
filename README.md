@@ -82,7 +82,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.2 Http Client
 
-- [x] Request Methods    徐浩钦 / 谭子悦
+- [x] Request Methods    谭子悦
   - [x] Custom request (debug only): `HttpClientrequest(HttpRequestMessage request)`
   - [x] GET request
   - [x] POST request
@@ -90,7 +90,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 - [ ] Display
   - [ ] GUI
   - [ ] CLI
-- [ ] Status Handler     陈骏
+- [ ] Status Handler     陈骏 谭子悦
   - [ ] 301 Moved Permanently
   - [ ] 302 Found
   - [ ] 304 Not Modified
@@ -110,7 +110,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
   - [ ] Long Connection Test
 - [ ] Client Tests
   - [ ] Parser Test 李佳骏 邱兴驰
-  - [ ] Status Handler Test 陈骏
+  - [ ] Status Handler Test 陈骏 谭子悦
   - [x] Request Test 谭子悦 
 - [ ] Login System Tests
   - [ ] TBD
