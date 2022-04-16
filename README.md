@@ -50,36 +50,42 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 - [x] MIME types: 谭子悦
   ```json
   {
-    "text": {
-      "default" : "plain",
-      "html"    : "html",
-      "css"     : "css"
+    "ascii": {
+      "text": {
+        "default" : "plain",
+        "html"    : "html",
+        "css"     : "css"
+      },
+  
+      "application": {
+        "js"      : "javascript"
+      },
+  
+      "image": {
+        "svg"     : "svg+xml"
+      }
     },
   
-    "application": {
-      "js"      : "javascript"
-    },
-  
-    "image": {
-      "jpeg"    : "jpeg",
-      "jpg"     : "jpeg",
-      "png"     : "png",
-      "gif"     : "gif",
-      "svg"     : "svg+xml"
+    "binary": {
+      "image": {
+        "jpeg"    : "jpeg",
+        "jpg"     : "jpeg",
+        "png"     : "png",
+        "gif"     : "gif",
+        "svg"     : "svg+xml"
+      }
     }
   }
   ```
-  
-  
   
 - [x] Target Handler
 
 ### 1.2.2 Http Client
 
-- [ ] Request Methods    徐浩钦
-  - [ ] Custom request (debug only): `HttpClientrequest(HttpRequestMessage request)`
-  - [ ] GET request
-  - [ ] POST request
+- [x] Request Methods    徐浩钦 / 谭子悦
+  - [x] Custom request (debug only): `HttpClientrequest(HttpRequestMessage request)`
+  - [x] GET request
+  - [x] POST request
 - [ ] Http Response Message Parser: `HttpClient.ParseResponseMessage` 李佳骏 邱兴驰
 - [ ] Display
   - [ ] GUI
@@ -105,6 +111,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 - [ ] Client Tests
   - [ ] Parser Test 李佳骏 邱兴驰
   - [ ] Status Handler Test 陈骏
+  - [x] Request Test 谭子悦 
 - [ ] Login System Tests
   - [ ] TBD
 
@@ -114,35 +121,56 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ## 1.3 代码结构图
 
-Updated on Apr 12, 2022
+Updated on Apr 16, 2022
 
 ```Java
 ./java   // ./src/main/java
-├── client                           // Client Module
-│   ├── HttpClient.java              // HttpClient 主程序
-│   ├── HttpRequestMessage.java      // Http Request Message 类, 继承HttpMessage
-│   └── StatusHandler.java           // Status Code Handler, Singleton
-├── server                           // Server Module
-│   ├── HttpResponseMessage.java     // Http Response Message 类, 继承HttpMessage       
-│   ├── HttpServer.java              // HttpServer 主程序
-│   ├── Mapping.java                 // Mapping Annotation
-│   ├── ResponseMessageFactory.java  // Response Message Factory, Singleton
-│   ├── TargetHandler.java           // Target Handler, Singleton
-│   └── TargetSet.java               // Target Set, Singleton
-└── util                              // Utility Module
-    ├── HttpMessage.java              // Http Message 抽象类
-    ├── Log.java                      // 日志工具方法类，仅在 -ea (Enable Assertion) 时启用
-    ├── MessageHelper.java            // Message Helper 助手方法类
-    └── WebMethods.java               // 常量存储类，包含 WebMethods.GET, WebMethods.POST
+src
+├── main
+│   ├── java
+│   │   ├── client
+│   │   │   ├── HttpClient.java
+│   │   │   ├── HttpRequestMessage.java
+│   │   │   └── StatusHandler.java
+│   │   ├── server
+│   │   │   ├── HttpResponseMessage.java
+│   │   │   ├── HttpServer.java
+│   │   │   ├── Mapping.java
+│   │   │   ├── ResponseMessageFactory.java
+│   │   │   ├── TargetHandler.java
+│   │   │   └── target
+│   │   │       ├── Common.java
+│   │   │       ├── Html.java
+│   │   │       ├── LoginSystem.java
+│   │   │       └── TargetSet.java
+│   │   └── util
+│   │       ├── Config.java
+│   │       ├── HttpMessage.java
+│   │       ├── Log.java
+│   │       ├── MessageHelper.java
+│   │       └── WebMethods.java
+│   └── resources
+│       ├── default_status_text.json
+│       ├── global_headers.json
+│       ├── mime.json
+│       ├── static_html
+│       │   └── static_files
+│       ├── target_path.json
+│       └── test_files
+└── test
+    └── java
+        ├── CustomTests.java
+        ├── ParserTest.java
+        ├── clienttests
+        │   ├── RequestTest.java
+        │   └── StatusHandlerTest.java
+        ├── loginsystemtests
+        └── servertests
+            ├── LongConnectionTest.java
+            ├── MIMETest.java
+            ├── ServerTests.java
+            └── TargetHandlerTest.java
 ```
-
-```Java
-test				// ./src/test 测试用例
-└── java
-    ├── CustomTests.java	// 自定义测试类，可自行编写测试
-  	......  // More Tests TBD
-```
-
 
 
 # 2. 注意事项
