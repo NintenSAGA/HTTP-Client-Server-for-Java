@@ -10,7 +10,9 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Getter
@@ -23,7 +25,10 @@ public abstract class HttpMessage {
 
     @Data
     private static class MediaType {
-        private final static String[] BINARY_TYPE = new String[]{ "image" };
+        private final static Set<MediaType> BINARY_TYPE;
+        static {
+            BINARY_TYPE = new HashSet<>();
+        }
         @NonNull String type;
         @NonNull String subtype;
         @Override
@@ -36,9 +41,17 @@ public abstract class HttpMessage {
     static {
         suffixToMime = new HashMap<>();
         JSONObject json = Config.getConfigAsJsonObj(Config.MIME);
-        for (String type : json.keySet()) {
-            JSONObject temp = json.getJSONObject(type);
-            temp.keySet().forEach(suffix -> suffixToMime.put(suffix, new MediaType(type, temp.getString(suffix))));
+        for (String codeType : json.keySet()) {
+            JSONObject codeTypeJson = json.getJSONObject(codeType);
+            for (String type : codeTypeJson.keySet()) {
+                JSONObject temp = codeTypeJson.getJSONObject(type);
+                temp.keySet().forEach(suffix -> {
+                    MediaType mediaType = new MediaType(type, temp.getString(suffix));
+                    suffixToMime.put(suffix, mediaType);
+                    if (codeType.equals("binary"))
+                        MediaType.BINARY_TYPE.add(mediaType);
+                });
+            }
         }
     }
 
@@ -65,13 +78,12 @@ public abstract class HttpMessage {
         String suffix = a[a.length - 1];
         MediaType mediaType = suffixToMime.getOrDefault(suffix, suffixToMime.get("default"));
         Log.debug("File %s sent as %s".formatted(path, mediaType));
-        for (String prefix : MediaType.BINARY_TYPE)
-            if (mediaType.toString().startsWith(prefix) && !mediaType.toString().equals("image/svg+xml")) {
-                binaryBody = Config.getResourceAsByteArray(path);
-                headers.put("Content-Type", "%s".formatted(mediaType));
-                headers.put("Content-Length", "%d".formatted(binaryBody.length));
-                return;
-            }
+        if (MediaType.BINARY_TYPE.contains(mediaType)) {
+            binaryBody = Config.getResourceAsByteArray(path);
+            headers.put("Content-Type", "%s".formatted(mediaType));
+            headers.put("Content-Length", "%d".formatted(binaryBody.length));
+            return;
+        }
 
         headers.put("Content-Type", "%s; charset=UTF-8".formatted(mediaType));
         String content = Config.getResourceAsString(path);
@@ -94,12 +106,12 @@ public abstract class HttpMessage {
         setBodyWithChunked(body);
     }
 
-    private void setBodyWithContentLength(String body) {
+    protected void setBodyWithContentLength(String body) {
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
     }
 
-    private void setBodyWithChunked(String body) {
+    protected void setBodyWithChunked(String body) {
         headers.put("Transfer-Encoding", "chunked");
         StringBuilder sb = new StringBuilder();
         int st = 0;

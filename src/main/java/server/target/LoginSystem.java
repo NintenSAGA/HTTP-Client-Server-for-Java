@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import server.HttpResponseMessage;
 import server.Mapping;
-import util.Log;
 import util.MessageHelper;
 import util.WebMethods;
 
@@ -15,6 +14,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static util.MessageHelper.parseArgs;
 
 public class LoginSystem extends TargetSet {
     @AllArgsConstructor
@@ -91,7 +92,7 @@ public class LoginSystem extends TargetSet {
 
     @Mapping(value = "/login", method = {WebMethods.GET})
     public static synchronized HttpResponseMessage login(HttpRequestMessage msg) {
-        Map<String, String> args = parseArgs(msg.getTarget());
+        Map<String, String> args = parseArgs(msg);
         HttpResponseMessage hrm = factory.produce(200);
         try {
             if (args == null) throw new Exception();
@@ -123,7 +124,7 @@ public class LoginSystem extends TargetSet {
     @Mapping(value = "/register", method = {WebMethods.POST})
     public static synchronized HttpResponseMessage register(HttpRequestMessage msg) {
         try {
-            Map<String, String> argMap = parseArgs(msg.getTarget());
+            Map<String, String> argMap = parseArgs(msg);
             if (argMap == null) throw new NullPointerException();
 
             String name = argMap.get("name"), password = argMap.get("password");

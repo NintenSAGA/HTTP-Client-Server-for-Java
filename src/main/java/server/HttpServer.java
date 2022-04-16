@@ -52,7 +52,7 @@ public class HttpServer {
         Log.debug(jsonObject.toString());
         jsonObject.keySet().forEach(k -> this.globalHeaders.put(k, jsonObject.getString(k)));
 
-        this.serverSocket.setSoTimeout(10000);
+        this.serverSocket.setSoTimeout(1000);
     }
 
     /**
@@ -127,6 +127,9 @@ public class HttpServer {
                 try {
                     requestMessage = temporaryParser(br);
                     Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
+//                    Log.logSocket(socket, "-------------- Message data --------------\n"
+//                            + requestMessage.flatMessage()
+//                            + "\n-------------- Message data --------------");
                     HttpResponseMessage responseMessage = handler.handle(requestMessage);
                     if (responseMessage.isBodyBinary()) {
                         outputStream.write(packUp(responseMessage).flatMessageToBinary());

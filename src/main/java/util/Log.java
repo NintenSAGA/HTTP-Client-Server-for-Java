@@ -1,5 +1,11 @@
 package util;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.function.UnaryOperator;
@@ -14,13 +20,43 @@ public class Log {
     private final static UnaryOperator<String> BODY = PURPLE;
 
     private static boolean enabled;
+    private static PrintWriter err;
+    private static PrintWriter out;
+    private static PrintWriter test;
+
 
     static {
         enabled = false;
         assert enabled = true;
+        err     = new PrintWriter(System.err, true);
+        out     = new PrintWriter(System.out, true);
+        test    = null;
     }
 
+    /**
+     * Initialize the test writer
+     * @param testStream output stream for test writer
+     */
+    synchronized public static void testInit(PrintStream testStream) {
+        test = new PrintWriter(testStream, true);
+    }
 
+    synchronized public static void setErrStream(PrintStream errStream) {
+        err = new PrintWriter(errStream, true);
+    }
+
+    synchronized public static void setOutStream(PrintStream outStream) {
+        out = new PrintWriter(outStream, true);
+    }
+
+    /**
+     * Write test message. Will do nothing if testInit hasn't performed
+     * @param msg test message
+     */
+    synchronized public static void testInfo(Object ... msg) {
+        if (test == null) return;
+        test.println(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining("")));
+    }
 
     /**
      * Print debug information to stderr with custom prompt<br/>
@@ -30,8 +66,8 @@ public class Log {
      */
     synchronized public static void debugPrompt(String prompt, Object ... msg) {
         if (!enabled) return;
-        System.err.print(PROMPT.apply("%s: ".formatted(prompt)));
-        System.err.println(BODY.apply(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining(""))));
+        err.print(PROMPT.apply("%s: ".formatted(prompt)));
+        err.println(BODY.apply(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining(""))));
     }
 
     /**
@@ -40,8 +76,8 @@ public class Log {
      * @param prompt Prompt word
      */
     synchronized public static void logPrompt(String prompt, Object ... msg) {
-        System.out.print(PURPLE.apply("%s: ".formatted(prompt)));
-        System.out.println(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining("")));
+        out.print(PURPLE.apply("%s: ".formatted(prompt)));
+        out.println(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining("")));
     }
 
     /**
@@ -86,7 +122,21 @@ public class Log {
      */
     public static void showExpectDiff(String prompt, String exp, String act) {
         if (!enabled) return;
-        System.err.print(PROMPT.apply(prompt + ": "));
-        System.err.println(BODY.apply("Expected: %s\tActual: %s%n".formatted(exp, act)));
+        err.print(PROMPT.apply(prompt + ": "));
+        err.println(BODY.apply("Expected: %s\tActual: %s%n".formatted(exp, act)));
+    }
+
+    public static void discardErr() throws FileNotFoundException {
+        if (!"Windows".equals(System.getProperty("os.name")))
+            setErrStream(new PrintStream("/dev/null"));
+        else
+            setErrStream(new PrintStream("nul"));
+    }
+
+    public static void discardStdout() throws FileNotFoundException {
+        if (!"Windows".equals(System.getProperty("os.name")))
+            setOutStream(new PrintStream("/dev/null"));
+        else
+            setOutStream(new PrintStream("nul"));
     }
 }

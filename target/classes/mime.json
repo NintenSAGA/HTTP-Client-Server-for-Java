@@ -1,19 +1,27 @@
 {
-  "text": {
-    "default" : "plain",
-    "html"    : "html",
-    "css"     : "css"
+  "ascii": {
+    "text": {
+      "default" : "plain",
+      "html"    : "html",
+      "css"     : "css"
+    },
+
+    "application": {
+      "js"      : "javascript"
+    },
+
+    "image": {
+      "svg"     : "svg+xml"
+    }
   },
 
-  "application": {
-    "js"      : "javascript"
-  },
-
-  "image": {
-    "jpeg"    : "jpeg",
-    "jpg"     : "jpeg",
-    "png"     : "png",
-    "gif"     : "gif",
-    "svg"     : "svg+xml"
+  "binary": {
+    "image": {
+      "jpeg"    : "jpeg",
+      "jpg"     : "jpeg",
+      "png"     : "png",
+      "gif"     : "gif",
+      "svg"     : "svg+xml"
+    }
   }
 }
