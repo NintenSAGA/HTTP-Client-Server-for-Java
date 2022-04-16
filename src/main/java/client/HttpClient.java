@@ -99,6 +99,7 @@ public class HttpClient {
         Log.logClient("Request complete");
         if (!longConnection)
             socket.close();
+        return null;
     }
 
     /**
