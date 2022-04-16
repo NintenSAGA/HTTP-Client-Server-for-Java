@@ -47,6 +47,20 @@ public class MessageHelper {
         }
         return sb.toString();
     }
+
+    /**
+     * Read bodies, consisting of a single file of unknown length
+     * @param br BufferedReader used by the upper flow
+     * @return Body String
+     */
+    public static String readVarBody(BufferedReader br) throws IOException{
+        assert (br!=null);
+        StringBuilder sb = new StringBuilder();
+        //todo
+
+        return sb.toString();
+    }
+
     /**
      * message parser method.
      * @param br Buffered reader from handleSocket
@@ -71,18 +85,28 @@ public class MessageHelper {
         }
         //处理实体主体
         String body = "";
+        //Single-resource bodies known-length (request and response)
         if (headers.containsKey("Content-Length"))
             body = MessageHelper.readBody(br, Integer.parseInt(headers.get("Content-Length")));
+        // todo：Multiple-resource bodies
 
 
+
+        //如果是requestMessage
         if (isReq) {
+            //Single-resource bodies known-length (request and response)
             return new HttpRequestMessage(startLine[0],startLine[1],startLine[2],headers,body);
-        }else {
+        }
+        //是responseMessage
+        else {
             HttpMessage httpResponseMessage = new HttpResponseMessage(Integer.parseInt(startLine[1]),startLine[2]);
+            //Single-resource bodies unknown-length (chunked)
             if (headers.containsValue("chunked")){
-                String newBody = "";
-                int contentLen = 0;
-                String[] strings = body.split("\r\n");
+                body = MessageHelper.readVarBody(br);
+                httpResponseMessage.setBodyWithChunked(body.getBytes(StandardCharsets.UTF_8));
+            }
+            else if (headers.containsKey("Content-Length")){
+                httpResponseMessage.setBodyAsPlainText(body);
             }
             return httpResponseMessage;
         }
