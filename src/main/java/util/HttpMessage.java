@@ -7,19 +7,24 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.GZIPOutputStream;
 
-@RequiredArgsConstructor
 @Getter
 public abstract class HttpMessage {
-    public static final String HTTP10 = "HTTP/1";
-    public static final String HTTP11 = "HTTP/1.1";
-    public static final String HTTP20 = "HTTP/2";
+    public static final String HTTP10       = "HTTP/1";
+    public static final String HTTP11       = "HTTP/1.1";
+    public static final String HTTP20       = "HTTP/2";
+    public static final int ZIP_THRESHOLD   = (1 << 10);  // 1 KB
 
     private static final int CHUNK_SIZE = 500;     // chunk size in char
 
@@ -55,20 +60,24 @@ public abstract class HttpMessage {
         }
     }
 
-    @NonNull private final String httpVersion;
-    @NonNull private final Map<String, String> headers;
-    @NonNull private String body;
-    private byte[] binaryBody;
+    @NonNull private final  String httpVersion;
+    @NonNull private final  Map<String, String> headers;
+    @NonNull private byte[] body;
 
     public HttpMessage() {
         httpVersion = HTTP11;
-        headers = new HashMap<>();
-        body = "";
-        binaryBody = null;
+        headers     = new HashMap<>();
+        body        = new byte[0];
     }
 
-    public boolean isBodyBinary() {
-        return binaryBody != null;
+    public HttpMessage(String httpVersion, Map<String, String> headers, String body) {
+        this.httpVersion = httpVersion;
+        this.headers = headers;
+        this.setBodyAsPlainText(body);
+    }
+
+    public String getBody() {
+        return new String(body);
     }
 
     public void addHeader(String key, String val) { headers.put(key, val); }
@@ -80,15 +89,29 @@ public abstract class HttpMessage {
         Log.debug("File %s sent as %s".formatted(path, mediaType));
         if (MediaType.BINARY_TYPE.contains(mediaType)) {
             Log.debug(mediaType, " is binary");
-            binaryBody = Config.getResourceAsByteArray(path);
             headers.put("Content-Type", "%s".formatted(mediaType));
-            headers.put("Content-Length", "%d".formatted(binaryBody.length));
-            return;
+        } else {
+            headers.put("Content-Type", "%s; charset=UTF-8".formatted(mediaType));
         }
+        body = Config.getResourceAsByteArray(path);
 
-        headers.put("Content-Type", "%s; charset=UTF-8".formatted(mediaType));
-        String content = Config.getResourceAsString(path);
-        setBodyWithContentLength(content);
+        if (body.length > ZIP_THRESHOLD) {
+            Log.debug("Body was zipped with GZIP");
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                GZIPOutputStream gzipOut = new GZIPOutputStream(bos, true);
+                gzipOut.write(body, 0, body.length);
+                gzipOut.finish();
+                body = bos.toByteArray();
+                headers.put("Content-Encoding", "gzip");
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.debug("Zipping failed!");
+            }
+            setBodyWithChunked(body);
+//            setBodyWithContentLength(body);
+        } else {
+            setBodyWithContentLength(body);
+        }
     }
 
     /**
@@ -96,35 +119,32 @@ public abstract class HttpMessage {
      */
     public void setBodyAsPlainText(String body) {
         headers.put("Content-Type", "text/plain; charset=UTF-8");
-        setBodyWithContentLength(body);
+        setBodyWithContentLength(body.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void setBodyAsHTML(String body) {
-        headers.put("Content-Type", "text/html; charset=UTF-8");
-        setBodyWithContentLength(body);
+    protected void setBodyWithContentLength(byte[] a) {
+        Log.debug("Content-Length: ", a.length >>> 10, "KB" );
+        headers.put("Content-Length", String.valueOf(a.length));
+        this.body = a;
     }
 
-    protected void setBodyWithContentLength(String body) {
-        Log.debug("Content-Length: ", body.getBytes().length >>> 10, "KB" );
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
-        this.body = body;
-    }
-
-    protected void setBodyWithChunked(String body) {
+    protected void setBodyWithChunked(byte[] a) {
         headers.put("Transfer-Encoding", "chunked");
-        StringBuilder sb = new StringBuilder();
-        int st = 0;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        for (; st < body.length(); st += CHUNK_SIZE) {
-            String chunk = body.substring(st, Math.min(st + CHUNK_SIZE, body.length()));
-            sb.append("%s\r\n%s\r\n".formatted(
-                    Integer.toString(chunk.getBytes().length,16),
-                    chunk
-            ));
+        try {
+            for (int st = 0; st < a.length; st += CHUNK_SIZE) {
+                int len = Math.min(CHUNK_SIZE, a.length - st);
+                bos.write("%s\r\n".formatted(Integer.toString(len, 16)).getBytes());
+                bos.write(a, st, len);
+                bos.write("\r\n".getBytes());
+            }
+            bos.write("0\r\n\r\n".getBytes());
+            this.body = bos.toByteArray();
+            assert body.length > a.length;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        sb.append("0\r\n\r\n");
-        this.body = sb.toString();
     }
 
     protected String flatMessage(String startLine) {
@@ -132,7 +152,7 @@ public abstract class HttpMessage {
         sb.append(startLine);      sb.append("\r\n");
         headers.forEach((k, v) -> sb.append("%s: %s\r\n".formatted(k, v)));
         sb.append("\r\n");
-        sb.append(body);
+        sb.append(new String(body, StandardCharsets.UTF_8));
         return sb.toString();
     }
 
@@ -142,8 +162,8 @@ public abstract class HttpMessage {
         headers.forEach((k, v) -> sb.append("%s: %s\r\n".formatted(k, v)));
         sb.append("\r\n");
         byte[] a = sb.toString().getBytes(StandardCharsets.UTF_8);
-        byte[] ret = Arrays.copyOf(a, a.length + binaryBody.length);
-        System.arraycopy(binaryBody, 0, ret, a.length, binaryBody.length);
+        byte[] ret = Arrays.copyOf(a, a.length + body.length);
+        System.arraycopy(body, 0, ret, a.length, body.length);
 
         return ret;
     }

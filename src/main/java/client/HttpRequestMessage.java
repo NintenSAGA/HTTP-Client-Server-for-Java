@@ -47,7 +47,7 @@ public class HttpRequestMessage extends HttpMessage {
 
     public void setBodyAsFormUrlencoded(String body) {
         this.getHeaders().put("Content-Type", "application/x-www-form-urlencoded");
-        this.setBodyWithContentLength(URLEncoder.encode(body, StandardCharsets.UTF_8));
+        this.setBodyWithContentLength(URLEncoder.encode(body, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

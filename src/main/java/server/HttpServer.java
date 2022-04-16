@@ -156,11 +156,7 @@ public class HttpServer {
 
                     Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
                     HttpResponseMessage responseMessage = handler.handle(requestMessage);
-                    if (responseMessage.isBodyBinary()) {
-                        ans = ByteBuffer.wrap(packUp(responseMessage).flatMessageToBinary());
-                    } else {
-                        ans = ByteBuffer.wrap(packUp(responseMessage).flatMessage().getBytes());
-                    }
+                    ans = ByteBuffer.wrap(packUp(responseMessage).flatMessageToBinary());
 
                     int written, chunk = TRANSPORT_CHUNK_SIZE;
                     for (written = 0; written < ans.limit(); ) {
