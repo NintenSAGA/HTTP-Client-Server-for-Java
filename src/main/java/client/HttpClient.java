@@ -107,7 +107,7 @@ public class HttpClient {
      * @param br Buffered reader from requests
      * @return HttpResponseMessage object
      */
-    private static HttpResponseMessage ParseResponseMessage(BufferedReader br) {
+    private static HttpResponseMessage parseResponseMessage(BufferedReader br) {
         // todo: ParseResponseMessage 李佳骏 邱兴驰
         return null;
     }

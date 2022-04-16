@@ -37,13 +37,13 @@ public class RequestTest {
 
 
     @Test
-    public void getTest() throws InterruptedException, IOException, ExecutionException {
+    public void getTest() throws IOException {
         new HttpClient().get("/test", null);
         assertEquals("HTTP/1.1 200 OK", br.readLine());
     }
 
     @Test
-    public void postTest() throws InterruptedException, IOException, ExecutionException {
+    public void postTest() throws IOException {
         new HttpClient().post("/register", "?name=hhh&password=996", null);
         assertEquals("HTTP/1.1 201 Created", br.readLine());
     }
