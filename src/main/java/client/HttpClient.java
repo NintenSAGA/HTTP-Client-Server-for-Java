@@ -90,7 +90,7 @@ public class HttpClient {
                 pw.flush();
                 Log.testInfo(br.readLine());
 //            HttpResponseMessage httpResponseMessage = ParseResponseMessage(br);
-//            httpResponseMessage = handler.handle(httpResponseMessage);
+//            httpResponseMessage = handler.handle(this, httpResponseMessage);
 //            Log.testInfo(httpResponseMessage.flatMessage());
             }
         } catch (IOException e) {
