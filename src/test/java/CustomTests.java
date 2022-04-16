@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 
 public class CustomTests {
 
-    @Test
+    @Test   
     public void sample() {
         Log.debug("Premature optimization is the root of all evil ——D. E. Knuth");
         Log.debug("虽然不太愿意承认，但始终假设自己的代码是错的。");
