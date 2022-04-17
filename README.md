@@ -91,8 +91,8 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
   - [ ] GUI
   - [ ] CLI
 - [ ] Status Handler     陈骏 谭子悦
-  - [ ] 301 Moved Permanently
-  - [ ] 302 Found
+  - [x] 301 Moved Permanently
+  - [x] 302 Found
   - [ ] 304 Not Modified
 
 ### 1.2.3 Login System (Server only) 谭子悦
