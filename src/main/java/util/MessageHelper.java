@@ -57,6 +57,16 @@ public class MessageHelper {
         assert (br!=null);
         StringBuilder sb = new StringBuilder();
         //todo
+        String line;
+        boolean isLen = true;
+        while(!(line = br.readLine()).isEmpty()){
+            if (isLen) {
+                isLen = false;
+            } else {
+                sb.append(line);
+                isLen = true;
+            }
+        }
 
         return sb.toString();
     }
@@ -99,16 +109,11 @@ public class MessageHelper {
         }
         //是responseMessage
         else {
-            HttpMessage httpResponseMessage = new HttpResponseMessage(Integer.parseInt(startLine[1]),startLine[2]);
             //Single-resource bodies unknown-length (chunked)
             if (headers.containsValue("chunked")){
                 body = MessageHelper.readVarBody(br);
-                httpResponseMessage.setBodyWithChunked(body.getBytes(StandardCharsets.UTF_8));
             }
-            else if (headers.containsKey("Content-Length")){
-                httpResponseMessage.setBodyAsPlainText(body);
-            }
-            return httpResponseMessage;
+            return new HttpResponseMessage(Integer.parseInt(startLine[1]),startLine[2],startLine[0],headers,body);
         }
     }
 
