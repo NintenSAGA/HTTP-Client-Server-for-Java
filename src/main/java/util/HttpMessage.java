@@ -70,10 +70,14 @@ public abstract class HttpMessage {
         body        = new byte[0];
     }
 
-    public HttpMessage(String httpVersion, Map<String, String> headers, String body) {
+    public HttpMessage(String httpVersion, Map<String, String> headers, byte[] body) {
         this.httpVersion = httpVersion;
         this.headers = headers;
-        this.setBodyAsPlainText(body);
+        this.body = body;
+    }
+
+    public HttpMessage(String httpVersion, Map<String, String> headers, String body) {
+        this(httpVersion, headers, body.getBytes());
     }
 
     public String getBody() {

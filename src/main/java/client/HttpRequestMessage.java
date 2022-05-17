@@ -25,10 +25,14 @@ public class HttpRequestMessage extends HttpMessage {
         this.target = URLEncoder.encode(target, StandardCharsets.UTF_8);
     }
 
-    public HttpRequestMessage(String method, String target, String httpVersion, Map<String, String> headers, String body) {
+    public HttpRequestMessage(String method, String target, String httpVersion, Map<String, String> headers, byte[] body) {
         super(httpVersion, headers, body);
         this.method = method;
         this.target = URLDecoder.decode(target, StandardCharsets.UTF_8);
+    }
+
+    public HttpRequestMessage(String method, String target, String httpVersion, Map<String, String> headers, String body) {
+        this(method, target, httpVersion, headers, body.getBytes());
     }
 
     public String flatMessage() {
