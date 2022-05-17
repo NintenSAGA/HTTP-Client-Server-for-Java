@@ -149,6 +149,7 @@ public class HttpServer {
                 try {
                     Future<Integer> future = socket.read(inputByteBuffer);
                     future.get(timeOut, TimeUnit.MILLISECONDS);
+                    // TODO: Read in byte stream
                     br = new BufferedReader(
                             new InputStreamReader(new ByteArrayInputStream(inputByteBuffer.array())));
                     requestMessage = temporaryParser(br);
