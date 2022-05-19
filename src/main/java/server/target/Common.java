@@ -5,13 +5,13 @@ import server.HttpResponseMessage;
 import server.Mapping;
 import util.Config;
 import util.Log;
-import util.WebMethods;
+import util.consts.WebMethods;
 
 public class Common extends TargetSet {
     @Mapping(value = "Missing", method = {WebMethods.GET, WebMethods.POST})
     public static HttpResponseMessage responseOnMis(HttpRequestMessage msg) {
         Log.debug("Target not found!");
-        // todo
+        // todo: Missing
         return factory.produce(404);
     }
 

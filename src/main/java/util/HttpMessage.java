@@ -6,18 +6,23 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
+import server.HttpResponseMessage;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
+
+import static util.consts.TransferEncoding.*;
 
 @Getter
 public abstract class HttpMessage {
@@ -27,20 +32,6 @@ public abstract class HttpMessage {
     public static final int ZIP_THRESHOLD   = (1 << 10);  // 1 KB
 
     private static final int CHUNK_SIZE = 500;     // chunk size in char
-
-    @Data
-    private static class MediaType {
-        private final static Set<MediaType> BINARY_TYPE;
-        static {
-            BINARY_TYPE = new HashSet<>();
-        }
-        @NonNull String type;
-        @NonNull String subtype;
-        @Override
-        public String toString() {
-            return "%s/%s".formatted(type, subtype);
-        }
-    }
 
     private static final Map<String, MediaType> suffixToMime;
     static {
@@ -60,9 +51,27 @@ public abstract class HttpMessage {
         }
     }
 
+    // ====================== Nested Class ========================= //
+
+    @Data
+    private static class MediaType {
+        private final static Set<MediaType> BINARY_TYPE;
+        static {
+            BINARY_TYPE = new HashSet<>();
+        }
+        @NonNull String type;
+        @NonNull String subtype;
+        @Override
+        public String toString() {
+            return "%s/%s".formatted(type, subtype);
+        }
+    }
+
     @NonNull private final  String httpVersion;
     @NonNull private final  Map<String, String> headers;
     @NonNull private byte[] body;
+
+    // ====================== Public ========================= //
 
     public HttpMessage() {
         httpVersion = HTTP11;
@@ -73,7 +82,7 @@ public abstract class HttpMessage {
     public HttpMessage(String httpVersion, Map<String, String> headers, byte[] body) {
         this.httpVersion = httpVersion;
         this.headers = headers;
-        this.body = body;
+        this.body = Objects.requireNonNullElseGet(body, () -> new byte[0]);
     }
 
     public HttpMessage(String httpVersion, Map<String, String> headers, String body) {
@@ -100,17 +109,7 @@ public abstract class HttpMessage {
         body = Config.getResourceAsByteArray(path);
 
         if (body.length > ZIP_THRESHOLD) {
-            Log.debug("Body was zipped with GZIP");
-            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                GZIPOutputStream gzipOut = new GZIPOutputStream(bos, true);
-                gzipOut.write(body, 0, body.length);
-                gzipOut.finish();
-                body = bos.toByteArray();
-                headers.put("Content-Encoding", "gzip");
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.debug("Zipping failed!");
-            }
+            bodyGzipEncode();
             setBodyWithChunked(body);
 //            setBodyWithContentLength(body);
         } else {
@@ -126,14 +125,24 @@ public abstract class HttpMessage {
         setBodyWithContentLength(body.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Force setting body as plain and set transfer-encoding as chunked
+     */
+    public void setBodyAsPlainTextChunked(String body) {
+        headers.put("Content-Type", "text/plain; charset=UTF-8");
+        setBodyWithChunked(body.getBytes(StandardCharsets.UTF_8));
+    }
+
+    // ====================== Protected ========================= //
+
     protected void setBodyWithContentLength(byte[] a) {
         Log.debug("Content-Length: ", a.length >>> 10, "KB" );
-        headers.put("Content-Length", String.valueOf(a.length));
+        headers.put(CONTENT_LENGTH, String.valueOf(a.length));
         this.body = a;
     }
 
     protected void setBodyWithChunked(byte[] a) {
-        headers.put("Transfer-Encoding", "chunked");
+        headers.put("Transfer-Encoding", CHUNKED);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try {
@@ -170,5 +179,21 @@ public abstract class HttpMessage {
         System.arraycopy(body, 0, ret, a.length, body.length);
 
         return ret;
+    }
+
+    // ==================== Protected ==================== //
+
+    private void bodyGzipEncode() {
+        Log.debug("Body was zipped with GZIP");
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            GZIPOutputStream gzipOut = new GZIPOutputStream(bos, true);
+            gzipOut.write(body, 0, body.length);
+            gzipOut.finish();
+            body = bos.toByteArray();
+            headers.put("Content-Encoding", GZIP);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.debug("Zipping failed!");
+        }
     }
 }

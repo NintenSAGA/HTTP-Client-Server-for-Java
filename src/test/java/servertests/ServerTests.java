@@ -48,7 +48,7 @@ public class ServerTests {
                     /usr/bin/curl --location --request GET http://127.0.0.1:8080/moved \\
                     --header "Content-Type: text/plain" \\
                     --data-raw "This is a test message""");
-            sleep(100000);
+            p.waitFor();
             httpServer.shutdown();
         } catch (Exception e) {
             e.printStackTrace();

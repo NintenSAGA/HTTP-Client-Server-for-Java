@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Getter
@@ -41,9 +42,9 @@ public class HttpRequestMessage extends HttpMessage {
     }
 
     public Map<String, String> getCookies() {
-        if (!getHeaders().containsKey("Cookie")) return null;
+        if (!getHeaders().containsKey("Cookie".toLowerCase(Locale.ROOT))) return null;
         Map<String, String> cookies = new HashMap<>();
-        Arrays.stream(getHeaders().get("Cookie").split("; "))
+        Arrays.stream(getHeaders().get("Cookie".toLowerCase(Locale.ROOT)).split("; "))
                 .map(expr -> expr.split("="))
                 .forEach(a -> cookies.put(a[0], a[1]));
         return cookies;

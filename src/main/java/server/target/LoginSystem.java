@@ -5,8 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import server.HttpResponseMessage;
 import server.Mapping;
+import util.Log;
 import util.MessageHelper;
-import util.WebMethods;
+import util.consts.WebMethods;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -136,6 +137,8 @@ public class LoginSystem extends TargetSet {
                 hrm.setBodyAsPlainText("The name has already existed!");
                 return hrm;
             }
+
+            Log.debug("User[%s] registered with password[%s]".formatted(name, password));
 
             User user = new User(name, password);
             userMap.put(name, user);

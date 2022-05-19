@@ -113,7 +113,7 @@ public class MessageHelper {
             if (headers.containsValue("chunked")){
                 body = MessageHelper.readVarBody(br);
             }
-            return new HttpResponseMessage(Integer.parseInt(startLine[1]),startLine[2],startLine[0],headers,body);
+            return new HttpResponseMessage(startLine[0],Integer.parseInt(startLine[1]),startLine[2],headers,body);
         }
     }
 
@@ -134,7 +134,7 @@ public class MessageHelper {
 
     public static Map<String, String> parseArgs(HttpRequestMessage msg) {
         String strArgs;
-        if ("application/x-www-form-urlencoded".equals(msg.getHeaders().get("Content-Type"))) {
+        if ("application/x-www-form-urlencoded".equals(msg.getHeaders().get("Content-Type".toLowerCase(Locale.ROOT)))) {
             strArgs = URLDecoder.decode(msg.getBody(), StandardCharsets.UTF_8);
         } else {
             String target = msg.getTarget();

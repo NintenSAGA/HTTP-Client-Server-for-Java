@@ -35,7 +35,13 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ## 1.2 任务
 
-- [ ] Message Parser: `util.MessageHelper.MessageParser`. 李佳骏 邱兴驰
+- [ ] Message Parser: `util.MessageHelper.MessageParser`. 谭子悦 李佳骏 邱兴驰
+    - [x] FrameWork
+    - [ ] Transfer-Encoding
+      - [x] Content-Length
+      - [x] Chunked
+      - [ ] Gzip
+      - [ ] Deflate
 
 ### 1.2.1 Http Server
 
@@ -45,8 +51,6 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
   - [x] Short connection
   - [x] Long connection
   
-- [ ] Http Request Message Parser: `HttpServer.ParseRequestMessage. 李佳骏 邱兴驰
-
 - [x] MIME types: 谭子悦
   ```json
   {
@@ -86,7 +90,6 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
   - [x] Custom request (debug only): `HttpClientrequest(HttpRequestMessage request)`
   - [x] GET request
   - [x] POST request
-- [ ] Http Response Message Parser: `HttpClient.ParseResponseMessage` 李佳骏 邱兴驰
 - [ ] Display
   - [ ] GUI
   - [ ] CLI
@@ -104,16 +107,23 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 ### 1.2.4 Test Cases
 
 - [ ] Server Tests
-  - [ ] Target Handler Test
-  - [ ] MIME Test
-  - [ ] Parser Test 李佳骏 邱兴驰
+  - [x] Main Loop
+  - [ ] Target Handler Test (Considering manual test)
+  - [ ] MIME Test (Considering manual test)
   - [ ] Long Connection Test
 - [ ] Client Tests
-  - [ ] Parser Test 李佳骏 邱兴驰
+  - [x] Main Loop
   - [ ] Status Handler Test 陈骏 谭子悦
   - [x] Request Test 谭子悦 
+- [ ] Parser Test
+  - [x] Content-Length Test
+  - [x] Chunked Test
+  - [ ] Gzip Test
+  - [ ] Deflate Test
 - [ ] Login System Tests
-  - [ ] TBD
+  - [x] Register
+  - [ ] Login
+  - [ ] Status
 
 ### 1.2.x Suggestions
 
@@ -123,53 +133,64 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 Updated on Apr 16, 2022
 
-```Java
-./java   // ./src/main/java
-src
-├── main
-│   ├── java
-│   │   ├── client
-│   │   │   ├── HttpClient.java
-│   │   │   ├── HttpRequestMessage.java
-│   │   │   └── StatusHandler.java
-│   │   ├── server
-│   │   │   ├── HttpResponseMessage.java
-│   │   │   ├── HttpServer.java
-│   │   │   ├── Mapping.java
-│   │   │   ├── ResponseMessageFactory.java
-│   │   │   ├── TargetHandler.java
-│   │   │   └── target
-│   │   │       ├── Common.java
-│   │   │       ├── Html.java
-│   │   │       ├── LoginSystem.java
-│   │   │       └── TargetSet.java
-│   │   └── util
-│   │       ├── Config.java
-│   │       ├── HttpMessage.java
-│   │       ├── Log.java
-│   │       ├── MessageHelper.java
-│   │       └── WebMethods.java
-│   └── resources
-│       ├── default_status_text.json
-│       ├── global_headers.json
-│       ├── mime.json
-│       ├── static_html
-│       │   └── static_files
-│       ├── target_path.json
-│       └── test_files
-└── test
-    └── java
-        ├── CustomTests.java
-        ├── ParserTest.java
-        ├── clienttests
-        │   ├── RequestTest.java
-        │   └── StatusHandlerTest.java
-        ├── loginsystemtests
-        └── servertests
-            ├── LongConnectionTest.java
-            ├── MIMETest.java
-            ├── ServerTests.java
-            └── TargetHandlerTest.java
+```
+.
+        ├── main
+        │   ├── java
+        │   │   ├── client
+        │   │   │   ├── HttpClient.java
+        │   │   │   ├── HttpRequestMessage.java
+        │   │   │   └── StatusHandler.java
+        │   │   ├── exception
+        │   │   │   └── InvalidMessageException.java
+        │   │   ├── server
+        │   │   │   ├── HttpResponseMessage.java
+        │   │   │   ├── HttpServer.java
+        │   │   │   ├── Mapping.java
+        │   │   │   ├── ResponseMessageFactory.java
+        │   │   │   ├── TargetHandler.java
+        │   │   │   └── target
+        │   │   │       ├── Common.java
+        │   │   │       ├── Html.java
+        │   │   │       ├── LoginSystem.java
+        │   │   │       └── TargetSet.java
+        │   │   └── util
+        │   │       ├── Config.java
+        │   │       ├── HttpMessage.java
+        │   │       ├── Log.java
+        │   │       ├── MessageHelper.java
+        │   │       ├── consts
+        │   │       │   ├── TransferEncoding.java
+        │   │       │   └── WebMethods.java
+        │   │       └── parser
+        │   │           ├── CustomerReader.java
+        │   │           ├── MessageParser.java
+        │   │           └── transdecode
+        │   │               ├── ChunkedStrategy.java
+        │   │               ├── ContentLengthStrategy.java
+        │   │               ├── DeflateStrategy.java
+        │   │               ├── GzipStrategy.java
+        │   │               └── TransDecodeStrategy.java
+        │   └── resources
+        │       ├── default_status_text.json
+        │       ├── global_headers.json
+        │       ├── mime.json
+        │       └── static_html
+        └── test
+            └── java
+                ├── CustomTests.java
+                ├── ParserTest.java
+                ├── clienttests
+                │   ├── RequestTest.java
+                │   └── StatusHandlerTest.java
+                ├── loginsystemtests
+                │   └── LoginSystemTests.java
+                └── servertests
+                ├── LongConnectionTest.java
+                ├── MIMETest.java
+                ├── ServerTests.java
+                └── TargetHandlerTest.java
+
 ```
 
 
@@ -198,3 +219,5 @@ src
 - 填写复用纯文本 (如 `GET`, `HTTP/1.1`) 前，先检查项目中是否已定义对应常量，若无，可考虑增加该常量类
 
 - 配置参数可以存为json文件放在`main/resources`下，将文件路径作为常量存在`util.Config`中，并用`util.Config`中的方法读取
+
+- 由于HTTP Message是 case insensitive 的，所以header, target等的解析和获取都要转换成全小写

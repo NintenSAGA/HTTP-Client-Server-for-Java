@@ -1,19 +1,16 @@
 package server;
 
 import client.HttpRequestMessage;
+import exception.InvalidMessageException;
 import org.json.JSONObject;
 import util.Config;
 import util.HttpMessage;
 import util.Log;
 import util.MessageHelper;
+import util.parser.MessageParser;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
@@ -23,8 +20,6 @@ import java.nio.channels.CompletionHandler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -89,20 +84,6 @@ public class HttpServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-//        try {
-//            while (alive.get()) {
-//                try {
-//                    a.se
-//                    Socket socket = serverSocket.accept();
-//                    CompletableFuture.runAsync(() -> handleSocket(socket, longConnection, timeOut));
-//                } catch (SocketTimeoutException ignored) { }
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        Log.logServer("The server is down");
     }
 
     /**
@@ -140,20 +121,24 @@ public class HttpServer {
             Log.logSocket(socket, "Long connection %sabled with timout %d".formatted(longConnection ? "en" : "dis", timeOut));
 
             ByteBuffer inputByteBuffer = ByteBuffer.allocate(1 << 20);
-            BufferedReader br = null;
 
             do {
                 Log.debug("A new loop~");
                 HttpRequestMessage requestMessage;
                 ByteBuffer ans;
                 try {
-                    Future<Integer> future = socket.read(inputByteBuffer);
-                    future.get(timeOut, TimeUnit.MILLISECONDS);
-                    // TODO: Read in byte stream
-                    br = new BufferedReader(
-                            new InputStreamReader(new ByteArrayInputStream(inputByteBuffer.array())));
-                    requestMessage = temporaryParser(br);
-                    inputByteBuffer.clear();
+
+//                    Future<Integer> future = socket.read(inputByteBuffer);
+//                    future.get(timeOut, TimeUnit.MILLISECONDS);
+//                    try (BufferedReader br = new BufferedReader(
+//                            new InputStreamReader(new ByteArrayInputStream(inputByteBuffer.array())))) {
+//                        // TODO: Read in byte stream
+//                        requestMessage = temporaryParser(br);
+//                        inputByteBuffer.clear();
+//                        if (false) throw new InvalidMessageException();
+//                    }
+
+                    requestMessage = new MessageParser(socket, timeOut).parseToHttpRequestMessage();
 
                     Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
                     HttpResponseMessage responseMessage = handler.handle(requestMessage);
@@ -165,8 +150,15 @@ public class HttpServer {
                     }
                     Log.logSocket(socket,"Response sent %f KB ".formatted((double) written / chunk));
                     Log.testExpect("Bytes sent", ans.limit(), written);
-                } catch (TimeoutException | ExecutionException e) {
+                } catch (TimeoutException e) {
                     Log.logSocket(socket, "Socket timeout");
+                    longConnection = false;
+                } catch (InvalidMessageException e) {
+                    e.printStackTrace();
+                    Log.logSocket(socket, "Invalid message occurs");
+                    e.printMsg(socket);
+                    ans = ByteBuffer.wrap(packUp(badRequest()).flatMessage().getBytes());
+                    socket.write(ans).get();
                     longConnection = false;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -177,7 +169,6 @@ public class HttpServer {
             } while (longConnection);
 
             Log.logSocket(socket, "Connection closed");
-            if (br != null) br.close();
             socket.close();
         } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -186,6 +177,10 @@ public class HttpServer {
 
     private static HttpResponseMessage internalError() {
         return ResponseMessageFactory.getInstance().produce(500);
+    }
+
+    private static HttpResponseMessage badRequest() {
+        return ResponseMessageFactory.getInstance().produce(400);
     }
 
     private static HttpRequestMessage temporaryParser(BufferedReader br)

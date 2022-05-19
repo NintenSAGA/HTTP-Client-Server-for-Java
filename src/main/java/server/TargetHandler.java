@@ -6,12 +6,12 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import client.HttpRequestMessage;
 import org.json.JSONObject;
-import server.target.TargetSet;
 import util.Config;
 import util.HttpMessage;
 import util.Log;
@@ -32,7 +32,7 @@ public class TargetHandler {
 
         supportedMethods = new HashSet<>();
         try {
-            Class<?> methods = Class.forName("util.WebMethods");
+            Class<?> methods = Class.forName("util.consts.WebMethods");
             for (Field field : methods.getDeclaredFields())
                 supportedMethods.add(field.getName());
         } catch (ClassNotFoundException e) {
@@ -102,6 +102,8 @@ public class TargetHandler {
 
         try {
             String target = msg.getTarget().split("\\?")[0];
+            target = target.toLowerCase(Locale.ROOT);
+
             if (!targetToMethod.containsKey(target)) {
                 String path = "static_html" + target;
                 if (ClassLoader.getSystemClassLoader().getResource(path) == null)

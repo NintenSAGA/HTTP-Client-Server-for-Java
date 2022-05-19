@@ -26,14 +26,20 @@ public class HttpResponseMessage extends HttpMessage {
         this.statusText = statusText;
     }
 
-    public HttpResponseMessage(int statusCode, String statusText, String httpVersion, Map<String, String> headers, byte[] body) {
+    public HttpResponseMessage(String httpVersion, int statusCode, String statusText, Map<String, String> headers, byte[] body) {
         super(httpVersion, headers, body);
         this.statusCode = statusCode;
         this.statusText = statusText;
     }
 
-    public HttpResponseMessage(int statusCode, String statusText, String httpVersion, Map<String, String> headers, String body) {
-        this(statusCode, statusText, httpVersion, headers, body.getBytes());
+    public HttpResponseMessage(String httpVersion, String statusCode, String statusText, Map<String, String> headers, byte[] body)
+    throws NumberFormatException
+    {
+        this(httpVersion, Integer.parseInt(statusCode), statusText, headers, body);
+    }
+
+    public HttpResponseMessage(String httpVersion, int statusCode, String statusText, Map<String, String> headers, String body) {
+        this(httpVersion, statusCode, statusText, headers, body.getBytes());
     }
 
     public HttpResponseMessage(int statusCode) {

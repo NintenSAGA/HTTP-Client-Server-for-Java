@@ -2,10 +2,9 @@ package client;
 
 import server.HttpResponseMessage;
 import util.Log;
-import util.WebMethods;
+import util.consts.WebMethods;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;

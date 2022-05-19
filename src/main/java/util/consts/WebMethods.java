@@ -1,4 +1,4 @@
-package util;
+package util.consts;
 
 public class WebMethods {
     public static final String GET = "GET";

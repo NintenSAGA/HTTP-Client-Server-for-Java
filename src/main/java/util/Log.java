@@ -50,6 +50,8 @@ public class Log {
         out = new PrintWriter(outStream, true);
     }
 
+    // ==================== Logging ==================== //
+
     /**
      * Write test message. Will do nothing if testInit hasn't performed
      * @param msg test message
@@ -118,6 +120,13 @@ public class Log {
         out.print("\r");
         logPrompt("SOCKET[%s]".formatted(prompt), msg);
     }
+
+    public static void panic(Object ... msg) {
+        debugPrompt("Panic", msg);
+        assert false;
+    }
+
+    // ==================== Testing ==================== //
 
     /**
      * Compare the given expected value and actual value.<br/>
