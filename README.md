@@ -163,7 +163,7 @@ Updated on Apr 16, 2022
         │   │       │   ├── TransferEncoding.java
         │   │       │   └── WebMethods.java
         │   │       └── parser
-        │   │           ├── CustomerReader.java
+        │   │           ├── CustomizedReader.java
         │   │           ├── MessageParser.java
         │   │           └── transdecode
         │   │               ├── ChunkedStrategy.java

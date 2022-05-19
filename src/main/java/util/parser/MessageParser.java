@@ -3,7 +3,6 @@ package util.parser;
 import client.HttpRequestMessage;
 import exception.InvalidMessageException;
 import server.HttpResponseMessage;
-import util.Log;
 import util.parser.transdecode.ChunkedStrategy;
 import util.parser.transdecode.ContentLengthStrategy;
 import util.parser.transdecode.TransDecodeStrategy;
@@ -37,7 +36,7 @@ public class MessageParser {
     private
     final Map<String, String> headers;
     private
-    final CustomerReader customerReader;
+    final CustomizedReader customizedReader;
 
     private
     String[] startLine;
@@ -52,12 +51,12 @@ public class MessageParser {
      */
     public MessageParser(byte[] bytes) {
         this.headers = new HashMap<>();
-        this.customerReader = new CustomerReader(bytes);
+        this.customizedReader = new CustomizedReader(bytes);
     }
 
     public MessageParser(AsynchronousSocketChannel socket, int timeout) {
         this.headers = new HashMap<>();
-        this.customerReader = new CustomerReader(socket, ByteBuffer.allocate(BUFFER_CAP), timeout);
+        this.customizedReader = new CustomizedReader(socket, ByteBuffer.allocate(BUFFER_CAP), timeout);
     }
 
     // ================= Private ======================== //
@@ -69,7 +68,7 @@ public class MessageParser {
             throws ExecutionException, InterruptedException,
             TimeoutException, InvalidMessageException {
         // -------- 1. Start Line ----------- //
-        String line = customerReader.readLine();
+        String line = customizedReader.readLine();
 
         startLine = line.split(" ");
         if (startLine.length != 3) {
@@ -78,7 +77,7 @@ public class MessageParser {
 
         // -------- 2. Headers -------------- //
 
-        while (!(line = customerReader.readLine()).isEmpty()) {
+        while (!(line = customizedReader.readLine()).isEmpty()) {
             int colonIdx = line.indexOf(':');
             if (colonIdx == -1) {
                 throw new InvalidMessageException("header line: ", line);
@@ -102,7 +101,7 @@ public class MessageParser {
         // -------------------- Content-Length -------------------- //
         if (headers.containsKey(content_length)) {
             strategy = strategyMap.get(content_length);
-            strategy.init(customerReader);
+            strategy.init(customizedReader);
             body = strategy.getBody(headers);
         }
 
@@ -119,7 +118,7 @@ public class MessageParser {
 
                 strategy = strategyMap.get(format.toLowerCase(Locale.ROOT));
                 if (body == null) {
-                    strategy.init(customerReader);
+                    strategy.init(customizedReader);
                 } else {
                     strategy.init(body);
                 }

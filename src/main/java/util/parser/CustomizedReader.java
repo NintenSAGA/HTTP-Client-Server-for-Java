@@ -1,7 +1,6 @@
 package util.parser;
 
 import exception.InvalidMessageException;
-import util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
@@ -10,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class CustomerReader {
+public class CustomizedReader {
     private final static
     int TEMP_CAP = 1 << 10;
 
@@ -28,14 +27,14 @@ public class CustomerReader {
 
     // -------------------- public -------------------- //
 
-    public CustomerReader(AsynchronousSocketChannel socket, ByteBuffer byteBuffer, int timeout) {
+    public CustomizedReader(AsynchronousSocketChannel socket, ByteBuffer byteBuffer, int timeout) {
         this.socket = socket;
         this.byteBuffer = byteBuffer;
         this.timeout = timeout;
         this.tempBuffer = ByteBuffer.allocate(TEMP_CAP);
     }
 
-    public CustomerReader(byte[] byteArray) {
+    public CustomizedReader(byte[] byteArray) {
         this.socket = null;
         this.byteBuffer = null;
         this.timeout = 0;
