@@ -59,6 +59,23 @@ public class MessageParser {
         this.customizedReader = new CustomizedReader(socket, ByteBuffer.allocate(BUFFER_CAP), timeout);
     }
 
+    // ================= Public ======================== //
+
+    public HttpRequestMessage parseToHttpRequestMessage()
+            throws ExecutionException, InterruptedException,
+            TimeoutException, InvalidMessageException {
+        parse();
+        return new HttpRequestMessage(startLine[0], startLine[1], startLine[2], headers, body);
+    }
+
+    public HttpResponseMessage parseToHttpResponseMessage()
+            throws ExecutionException, InterruptedException,
+            TimeoutException, NumberFormatException, InvalidMessageException
+    {
+        parse();
+        return new HttpResponseMessage(startLine[0], startLine[1], startLine[2], headers, body);
+    }
+
     // ================= Private ======================== //
 
     /**
@@ -128,20 +145,4 @@ public class MessageParser {
         }
     }
 
-    // ================= Public ======================== //
-
-    public HttpRequestMessage parseToHttpRequestMessage()
-            throws ExecutionException, InterruptedException,
-            TimeoutException, InvalidMessageException {
-        parse();
-        return new HttpRequestMessage(startLine[0], startLine[1], startLine[2], headers, body);
-    }
-
-    public HttpResponseMessage parseToHttpResponseMessage()
-            throws ExecutionException, InterruptedException,
-            TimeoutException, NumberFormatException, InvalidMessageException
-    {
-        parse();
-        return new HttpResponseMessage(startLine[0], startLine[1], startLine[2], headers, body);
-    }
 }
