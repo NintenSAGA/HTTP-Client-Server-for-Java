@@ -28,7 +28,7 @@ public class StatusHandler {
             case 302: {
                 // Found
                 String httpVersion = msg.getHttpVersion();
-                String newTarget = msg.getHeaders().get("Location");
+                String newTarget = msg.getHeaderVal("Location");
                 return client.get(newTarget, null);
             }
             case 304: {

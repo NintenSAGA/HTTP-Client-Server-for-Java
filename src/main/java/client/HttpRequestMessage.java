@@ -36,22 +36,22 @@ public class HttpRequestMessage extends HttpMessage {
         this(method, target, httpVersion, headers, body.getBytes());
     }
 
-    public String flatMessage() {
-        String startLine = "%s %s %s".formatted(getMethod(), getTarget() ,getHttpVersion());
-        return flatMessage(startLine);
+    @Override
+    protected String getStartLine() {
+        return "%s %s %s".formatted(getMethod(), getTarget() ,getHttpVersion());
     }
 
     public Map<String, String> getCookies() {
-        if (!getHeaders().containsKey("Cookie".toLowerCase(Locale.ROOT))) return null;
+        if (!containsHeader("Cookie".toLowerCase(Locale.ROOT))) return null;
         Map<String, String> cookies = new HashMap<>();
-        Arrays.stream(getHeaders().get("Cookie".toLowerCase(Locale.ROOT)).split("; "))
+        Arrays.stream(getHeaderVal("Cookie".toLowerCase(Locale.ROOT)).split("; "))
                 .map(expr -> expr.split("="))
                 .forEach(a -> cookies.put(a[0], a[1]));
         return cookies;
     }
 
     public void setBodyAsFormUrlencoded(String body) {
-        this.getHeaders().put("Content-Type", "application/x-www-form-urlencoded");
+        this.addHeader("Content-Type", "application/x-www-form-urlencoded");
         this.setBodyWithContentLength(URLEncoder.encode(body, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8));
     }
 

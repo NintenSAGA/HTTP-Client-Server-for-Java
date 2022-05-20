@@ -125,13 +125,10 @@ public class MessageParser {
         // -------------------- Others -------------------- //
         if (headers.containsKey(transfer_encoding)) {
             String formatStr = headers.get(transfer_encoding);
-            for (String format : formatStr.split(",")) {
-                if (format.isEmpty()) continue;
-                format = format.strip();
+            String[] formats = formatStr.split(",");
 
-                // TODO: conflict detection of chunked and content_length
-
-                format = format.strip();
+            for (int i = formats.length - 1; i >= 0; i--) {
+                String format = formats[i].strip();
 
                 strategy = strategyMap.get(format.toLowerCase(Locale.ROOT));
                 if (body == null) {
@@ -142,6 +139,7 @@ public class MessageParser {
 
                 body = strategy.getBody(headers);
             }
+
         }
     }
 

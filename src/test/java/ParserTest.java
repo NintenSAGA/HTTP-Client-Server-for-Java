@@ -3,7 +3,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import server.HttpResponseMessage;
 import server.ResponseMessageFactory;
-import util.Log;
 import util.parser.MessageParser;
 
 import java.util.concurrent.ExecutionException;
@@ -34,7 +33,7 @@ public class ParserTest {
     private void testText(HttpResponseMessage hrm) {
         MessageParser parser = new MessageParser(hrm.flatMessageToBinary());
         try {
-            String msg = parser.parseToHttpResponseMessage().getBody();
+            String msg = parser.parseToHttpResponseMessage().getBodyAsString();
             assertEquals(longText, msg);
         } catch (InvalidMessageException e) {
             e.printMsg(null);

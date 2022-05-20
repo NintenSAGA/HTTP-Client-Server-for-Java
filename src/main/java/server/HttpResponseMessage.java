@@ -46,19 +46,14 @@ public class HttpResponseMessage extends HttpMessage {
         this(statusCode, defaultStatusText(statusCode));
     }
 
-    public String flatMessage() {
-        String startLine = "%s %s %s".formatted(getHttpVersion(), getStatusCode(), getStatusText());
-        return flatMessage(startLine);
-    }
-
-    public byte[] flatMessageToBinary() {
-        String startLine = "%s %s %s".formatted(getHttpVersion(), getStatusCode(), getStatusText());
-        return flatMessageToBinary(startLine);
+    @Override
+    protected String getStartLine() {
+        return "%s %s %s".formatted(getHttpVersion(), getStatusCode(), getStatusText());
     }
 
     public void addCookie(String key, String val) {
         String expr = "%s=%s".formatted(key, val);
-        getHeaders().merge("Set-Cookie", expr, "%s; %s"::formatted);
+        mergeHeader("Set-Cookie", expr, "%s; %s"::formatted);
     }
 
     @Override

@@ -1,30 +1,27 @@
 package util;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import server.HttpResponseMessage;
 
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.zip.GZIPOutputStream;
 
 import static util.consts.TransferEncoding.*;
 
-@Getter
 public abstract class HttpMessage {
     public static final String HTTP10       = "HTTP/1";
     public static final String HTTP11       = "HTTP/1.1";
@@ -67,9 +64,12 @@ public abstract class HttpMessage {
         }
     }
 
-    @NonNull private final  String httpVersion;
-    @NonNull private final  Map<String, String> headers;
+    @NonNull @Getter private final  String httpVersion;
+    @NonNull @Getter private final  Map<String, String> headers;
+
     @NonNull private byte[] body;
+
+    private InputStream bodyStream;
 
     // ====================== Public ========================= //
 
@@ -89,11 +89,67 @@ public abstract class HttpMessage {
         this(httpVersion, headers, body.getBytes());
     }
 
-    public String getBody() {
-        return new String(body);
+    /**
+     * Containing the trailing CRLF
+     */
+    public String getStartLineAndHeaders() {
+        return
+                getStartLine()  + "\r\n" +
+                getHeadersAsString()    + "\r\n";
     }
 
+    public InputStream getStartLineAndHeadersAsStream() {
+        return new ByteArrayInputStream(
+                getStartLineAndHeaders().getBytes());
+    }
+
+    public InputStream getBodyAsStream() {
+        if (bodyStream != null) return bodyStream;
+        return new ByteArrayInputStream(body);
+    }
+
+    public byte[] getBodyAsBytes() {
+        return body;
+    }
+
+    public String getBodyAsString() {
+        return new String(getBodyAsBytes());
+    }
+
+    public String flatMessage() {
+        return new String(flatMessageToBinary(), StandardCharsets.UTF_8);
+    }
+
+    public byte[] flatMessageToBinary() {
+        byte[] a = getStartLineAndHeaders().getBytes(StandardCharsets.UTF_8);
+        byte[] body;
+
+        try {
+            body = getBodyAsStream().readAllBytes();
+            byte[] ret = Arrays.copyOf(a, a.length + body.length);
+            System.arraycopy(body, 0, ret, a.length, body.length);
+            return ret;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new byte[0];
+        }
+    }
+
+
+    // -------------------- Header Setting -------------------- //
+
     public void addHeader(String key, String val) { headers.put(key, val); }
+
+    public void putAllHeaders(Map<String, String> headers) { this.headers.putAll(headers); }
+
+    public String getHeaderVal(String key) { return headers.get(key.toLowerCase(Locale.ROOT)); }
+
+    public boolean containsHeader(String key) { return headers.containsKey(key.toLowerCase(Locale.ROOT)); }
+
+    public void mergeHeader(String a, String b, BiFunction<String, String, String> func) { headers.merge(a, b, func); }
+
+
+    // -------------------- Body Setting -------------------- //
 
     public void setBodyAsFile(String path) {
         String[] a = path.split("\\.");
@@ -106,15 +162,16 @@ public abstract class HttpMessage {
         } else {
             headers.put("Content-Type", "%s; charset=UTF-8".formatted(mediaType));
         }
-        body = Config.getResourceAsByteArray(path);
 
-        if (body.length > ZIP_THRESHOLD) {
-            bodyGzipEncode();
-            setBodyWithChunked(body);
-//            setBodyWithContentLength(body);
-        } else {
-            setBodyWithContentLength(body);
-        }
+        bodyStream = Config.getResourceAsStream(path);
+
+//        byte[] bytes = Config.getResourceAsByteArray(path);
+//        setBody(bytes);
+
+        // TODO: separate Content-Encoding
+//        if (body.length > ZIP_THRESHOLD) {
+//            bodyGzipEncode();
+//        }
     }
 
     /**
@@ -122,12 +179,17 @@ public abstract class HttpMessage {
      */
     public void setBodyAsPlainText(String body) {
         headers.put("Content-Type", "text/plain; charset=UTF-8");
-        setBodyWithContentLength(body.getBytes(StandardCharsets.UTF_8));
+        setBody(body.getBytes());
+    }
+
+    public void setBody(byte[] body) {
+        this.body = body;
     }
 
     /**
      * Force setting body as plain and set transfer-encoding as chunked
      */
+    @Deprecated
     public void setBodyAsPlainTextChunked(String body) {
         headers.put("Content-Type", "text/plain; charset=UTF-8");
         setBodyWithChunked(body.getBytes(StandardCharsets.UTF_8));
@@ -135,12 +197,14 @@ public abstract class HttpMessage {
 
     // ====================== Protected ========================= //
 
+    @Deprecated
     protected void setBodyWithContentLength(byte[] a) {
         Log.debug("Content-Length: ", a.length >>> 10, "KB" );
         headers.put(CONTENT_LENGTH, String.valueOf(a.length));
-        this.body = a;
+        setBody(a);
     }
 
+    @Deprecated
     protected void setBodyWithChunked(byte[] a) {
         headers.put("Transfer-Encoding", CHUNKED);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -153,43 +217,31 @@ public abstract class HttpMessage {
                 bos.write("\r\n".getBytes());
             }
             bos.write("0\r\n\r\n".getBytes());
-            this.body = bos.toByteArray();
+            setBody(bos.toByteArray());
             assert body.length > a.length;
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    protected String flatMessage(String startLine) {
+    protected abstract String getStartLine();
+
+    // ==================== Private ==================== //
+
+    private String getHeadersAsString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(startLine);      sb.append("\r\n");
         headers.forEach((k, v) -> sb.append("%s: %s\r\n".formatted(k, v)));
-        sb.append("\r\n");
-        sb.append(new String(body, StandardCharsets.UTF_8));
         return sb.toString();
     }
 
-    protected byte[] flatMessageToBinary(String startLine) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(startLine);      sb.append("\r\n");
-        headers.forEach((k, v) -> sb.append("%s: %s\r\n".formatted(k, v)));
-        sb.append("\r\n");
-        byte[] a = sb.toString().getBytes(StandardCharsets.UTF_8);
-        byte[] ret = Arrays.copyOf(a, a.length + body.length);
-        System.arraycopy(body, 0, ret, a.length, body.length);
-
-        return ret;
-    }
-
-    // ==================== Protected ==================== //
-
+    @Deprecated
     private void bodyGzipEncode() {
         Log.debug("Body was zipped with GZIP");
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             GZIPOutputStream gzipOut = new GZIPOutputStream(bos, true);
-            gzipOut.write(body, 0, body.length);
+            gzipOut.write(getBodyAsBytes(), 0, body.length);
             gzipOut.finish();
-            body = bos.toByteArray();
+            setBody(bos.toByteArray());
             headers.put("Content-Encoding", GZIP);
         } catch (IOException e) {
             e.printStackTrace();

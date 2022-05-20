@@ -7,6 +7,7 @@ import util.Config;
 import util.HttpMessage;
 import util.Log;
 import util.MessageHelper;
+import util.packer.MessagePacker;
 import util.parser.MessageParser;
 
 import java.io.BufferedReader;
@@ -23,17 +24,22 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static util.consts.TransferEncoding.CHUNKED;
+import static util.consts.TransferEncoding.CONTENT_LENGTH;
+
 public class HttpServer {
     private final static boolean    DEFAULT_LONG_CONNECTION = false;
     private final static int        DEFAULT_TIMEOUT         = 10000;
-    private final static int        TRANSPORT_CHUNK_SIZE    = 1 << 10;
+    private final static String[]   TRANSFER_ENCODINGS = { CHUNKED };
+//    private final static String[]   TRANSFER_ENCODINGS = null;
 
-//    private final ServerSocket serverSocket;
     private final AsynchronousServerSocketChannel aServerSocket;
     private final TargetHandler handler;
     private final Map<String, String> globalHeaders;
 
     private final AtomicBoolean alive;
+
+    // ==================== Constructors ==================== //
 
     public HttpServer(String hostName, int port) throws IOException {
         this.handler = TargetHandler.getInstance();
@@ -53,6 +59,8 @@ public class HttpServer {
     public HttpServer() throws IOException {
         this("127.0.0.1", 8080);
     }
+
+    // ==================== Public ==================== //
 
     /**
      * Start up the main loop <br/>
@@ -110,6 +118,8 @@ public class HttpServer {
         }
     }
 
+    // ==================== Private ==================== //
+
     /**
      * Should be packed in a Thread <br/>
      * Socket handler --> TargetHandler --> Output handler <br/>
@@ -120,36 +130,22 @@ public class HttpServer {
             assert timeOut > 0;
             Log.logSocket(socket, "Long connection %sabled with timout %d".formatted(longConnection ? "en" : "dis", timeOut));
 
-            ByteBuffer inputByteBuffer = ByteBuffer.allocate(1 << 20);
 
             do {
-                Log.debug("A new loop~");
-                HttpRequestMessage requestMessage;
-                ByteBuffer ans;
+                HttpResponseMessage responseMessage = null;
+
                 try {
 
-//                    Future<Integer> future = socket.read(inputByteBuffer);
-//                    future.get(timeOut, TimeUnit.MILLISECONDS);
-//                    try (BufferedReader br = new BufferedReader(
-//                            new InputStreamReader(new ByteArrayInputStream(inputByteBuffer.array())))) {
-//                        // TODO: Read in byte stream
-//                        requestMessage = temporaryParser(br);
-//                        inputByteBuffer.clear();
-//                        if (false) throw new InvalidMessageException();
-//                    }
-
-                    requestMessage = new MessageParser(socket, timeOut).parseToHttpRequestMessage();
+                // -------------------- 1. Receive and parse raw message to object -------------------- //
+                    MessageParser parser = new MessageParser(socket, timeOut);
+                    HttpRequestMessage requestMessage = parser.parseToHttpRequestMessage();
 
                     Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
-                    HttpResponseMessage responseMessage = handler.handle(requestMessage);
-                    ans = ByteBuffer.wrap(packUp(responseMessage).flatMessageToBinary());
 
-                    int written, chunk = TRANSPORT_CHUNK_SIZE;
-                    for (written = 0; written < ans.limit(); ) {
-                        written += socket.write(ans.slice(written, Math.min(ans.limit() - written, chunk))).get();
-                    }
-                    Log.logSocket(socket,"Response sent %f KB ".formatted((double) written / chunk));
-                    Log.testExpect("Bytes sent", ans.limit(), written);
+                // -------------------- 2. Handle the request and generate response -------------------- //
+                    responseMessage = handler.handle(requestMessage);
+
+                /*               Error Handling               */
                 } catch (TimeoutException e) {
                     Log.logSocket(socket, "Socket timeout");
                     longConnection = false;
@@ -157,15 +153,21 @@ public class HttpServer {
                     e.printStackTrace();
                     Log.logSocket(socket, "Invalid message occurs");
                     e.printMsg(socket);
-                    ans = ByteBuffer.wrap(packUp(badRequest()).flatMessage().getBytes());
-                    socket.write(ans).get();
                     longConnection = false;
+                    responseMessage = badRequest();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    ans = ByteBuffer.wrap(packUp(internalError()).flatMessage().getBytes());
-                    socket.write(ans).get();
                     longConnection = false;
+                    responseMessage = internalError();
                 }
+                /*               Error Handling               */
+
+                // -------------------- 3. Pack up and send out the respond -------------------- //
+                if (responseMessage != null) {
+                    MessagePacker packer = new MessagePacker(packUp(responseMessage), TRANSFER_ENCODINGS);
+                    packer.send(socket);
+                }
+
             } while (longConnection);
 
             Log.logSocket(socket, "Connection closed");
@@ -183,48 +185,13 @@ public class HttpServer {
         return ResponseMessageFactory.getInstance().produce(400);
     }
 
-    private static HttpRequestMessage temporaryParser(BufferedReader br)
-            throws IOException {
-        String line = br.readLine();
-        if (line == null) throw new SocketTimeoutException();
-        String[] start = line.split(" ");
-        assert start.length == 3 : start;
-
-        Map<String, String> headers = new HashMap<>();
-        String body = "";
-
-        while (!(line = br.readLine()).isEmpty()) {
-            String[] a = line.split(": ");
-            assert a.length == 2;
-            String key = a[0], val = a[1];
-            headers.put(key, val);
-        }
-        if (headers.containsKey("Content-Length"))
-            body = MessageHelper.readBody(br, Integer.parseInt(headers.get("Content-Length")));
-
-        return new HttpRequestMessage(start[0], start[1], start[2], headers, body);
-    }
-
     /**
      * Pack up the message before sending. Including appending the global header of the server.
      */
     private HttpResponseMessage packUp(HttpResponseMessage msg) {
-        msg.getHeaders().putAll(this.globalHeaders);
+        msg.putAllHeaders(this.globalHeaders);
         msg.addHeader("Date", MessageHelper.getTime());
         return msg;
     }
-
-    /**
-     * Convert raw string to HttpRequestMessage object <br/>
-     * Referring <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages>Http Message</a>
-     * @param br Buffered reader from handleSocket
-     * @return HttpRequestMessage object
-     */
-    private static HttpRequestMessage ParseRequestMessage(BufferedReader br) throws IOException {
-        // todo: ParseRequestMessage 李佳骏 邱兴驰
-        HttpMessage httpRequestMessage = MessageHelper.messageParser(br,true);
-        return (HttpRequestMessage) httpRequestMessage;
-    }
-
 
 }

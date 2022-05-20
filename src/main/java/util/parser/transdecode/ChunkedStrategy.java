@@ -10,18 +10,21 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static util.consts.TransferEncoding.content_length;
+
 public class ChunkedStrategy extends TransDecodeStrategy {
     @Override
     public byte[] getBody(Map<String, String> headers) throws InvalidMessageException {
+        if (headers.containsKey(content_length))
+            throw new InvalidMessageException("containing Content-Length header!");
+
         try {
             Queue<byte[]> queue = new LinkedList<>();
             int sumLen = 0;
 
             for (int chunkLen; (chunkLen = Integer.parseInt(reader.readLine(), 16)) != 0; ) {
                 sumLen += chunkLen;
-//                Log.debug("%d read".formatted(chunkLen));
                 byte[] bytes = reader.readNBytes(chunkLen);
-//                Log.debug("%s read".formatted(new String(bytes)));
                 queue.offer(bytes);
                 reader.readNBytes(2); //CRLF
             }
@@ -30,6 +33,8 @@ public class ChunkedStrategy extends TransDecodeStrategy {
             ByteBuffer byteBuffer = ByteBuffer.allocate(sumLen);
             while (!queue.isEmpty())
                 byteBuffer.put(queue.poll());
+
+            headers.put(content_length, String.valueOf(sumLen));
 
             return byteBuffer.array();
         } catch (NumberFormatException e) {
