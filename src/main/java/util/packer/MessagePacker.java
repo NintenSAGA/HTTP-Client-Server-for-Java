@@ -4,8 +4,10 @@ import util.HttpMessage;
 import util.Log;
 import util.packer.transencode.ChunkedStrategy;
 import util.packer.transencode.ContentLengthStrategy;
+import util.packer.transencode.SourceStrategy;
 import util.packer.transencode.TransEncodeStrategy;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -96,14 +98,15 @@ public class MessagePacker {
         // -------------------- 1. Transfer Encoding -------------------- //
         InputStream bodyStream = message.getBodyAsStream();
 
-        //*               1. Content-Length               */
+        TransEncodeStrategy upperStrategy = new SourceStrategy(bodyStream);
+
         if (transferEncodings == null) {
-            bodyStream = strategyMap.get(CONTENT_LENGTH).encode(message.getHeaders(), bodyStream);
+            upperStrategy = strategyMap.get(CONTENT_LENGTH).connect(message.getHeaders(), upperStrategy);
         } else {
             for (String te : transferEncodings) {
                 if (!strategyMap.containsKey(te))
                     Log.panic("Unsupported transfer-encoding[%s]!".formatted(te));
-                bodyStream = strategyMap.get(te).encode(message.getHeaders(), bodyStream);
+                upperStrategy = strategyMap.get(te).connect(message.getHeaders(), upperStrategy);
             }
         }
 
@@ -111,9 +114,13 @@ public class MessagePacker {
         written += flush(message.getStartLineAndHeadersAsStream());
 
         // -------------------- 3. Send out -------------------- //
-        written += flush(bodyStream);
+        for (byte[] bytes; (bytes = upperStrategy.readBytes()).length != 0; ) {
+            ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+            written += flush(stream);
+        }
 
-        Log.logSocket(socket,"Response sent %f KB ".formatted((double) written / (1 << 10)));
+        if (socket != null)
+            Log.logSocket(socket,"Response sent %f KB ".formatted((double) written / (1 << 10)));
 
         return written;
     }
@@ -128,7 +135,7 @@ public class MessagePacker {
                         ByteBuffer.wrap(bytes)
                 );
                 int delta = future.get();
-                Log.testExpect("Bytes sent", bytes.length, delta);
+                assert Log.testExpect("Bytes sent", bytes.length, delta);
                 written += delta;
             }
         } else {

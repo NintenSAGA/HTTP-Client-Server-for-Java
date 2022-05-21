@@ -2,7 +2,9 @@ package clienttests;
 
 import client.HttpClient;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import server.HttpServer;
@@ -24,8 +26,8 @@ public class RequestTest {
     static CompletableFuture<Void> future;
     static BufferedReader br;
 
-    @BeforeAll
-    static void setUp() throws IOException {
+    @BeforeEach
+    void setUp() throws IOException {
         Log.discardErr();
         PipedInputStream pipedInputStream = new PipedInputStream();
         PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
@@ -52,8 +54,8 @@ public class RequestTest {
     }
 
 
-    @AfterAll
-    static void cleanUp() throws ExecutionException, InterruptedException, IOException {
+    @AfterEach
+    void cleanUp() throws ExecutionException, InterruptedException, IOException {
         server.shutdown();
         br.close();
     }

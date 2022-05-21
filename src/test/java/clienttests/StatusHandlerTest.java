@@ -2,8 +2,8 @@ package clienttests;
 
 /**
  * Test cases for Status Handler of the client
- * Author: 陈骏
+ * Author: tzy
  */
 public class StatusHandlerTest {
-    // todo: 陈骏
+    // todo: tzy
 }

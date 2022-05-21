@@ -1,26 +1,35 @@
 package util.packer.transencode;
 
+import util.Log;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
 
 import static util.consts.TransferEncoding.CONTENT_LENGTH;
 
 public class ContentLengthStrategy extends TransEncodeStrategy {
-    private byte[] bytes;
+    private ByteArrayInputStream bis;
+    private boolean done;
 
     @Override
-    protected void headerEditing() throws IOException {
-        bytes = inputStream.readAllBytes();
-        int length = bytes.length;
-        headers.put(CONTENT_LENGTH, String.valueOf(length));
+    public byte[] readBytes() {
+        if (done) return new byte[0];
+        done = true;
+        return bis.readAllBytes();
     }
 
     @Override
-    protected void encode() throws IOException {
-        outputStream.write(bytes);
-        outputStream.flush();
-        outputStream.close();
+    protected byte[] readNBytes(int n) throws IOException {
+        return bis.readNBytes(n);
+    }
+
+    @Override
+    protected void headerEditing() throws IOException {
+        byte[] bytes = upper.readBytes();
+        int length = bytes.length;
+        bis = new ByteArrayInputStream(bytes);
+        headers.put(CONTENT_LENGTH, String.valueOf(length));
+        Log.debug("Content_length: %d".formatted(length));
+        done = false;
     }
 }

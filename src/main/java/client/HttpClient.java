@@ -1,8 +1,11 @@
 package client;
 
+import exception.InvalidMessageException;
 import server.HttpResponseMessage;
 import util.Log;
 import util.consts.WebMethods;
+import util.packer.MessagePacker;
+import util.parser.MessageParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,22 +13,25 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class HttpClient {
-    private final InetAddress hostAddress;
-    private final int hostPort;
-    private final Socket socket;
+    private final AsynchronousSocketChannel aSocket;
     private final StatusHandler handler;
     private boolean longConnection;
 
     public HttpClient(String hostName, int hostPort, boolean longConnection) throws IOException {
-        this.hostAddress = InetAddress.getByName(hostName);
-        this.hostPort = hostPort;
-        this.socket = new Socket(hostAddress, hostPort);
+        this.aSocket = AsynchronousSocketChannel.open();
+        InetSocketAddress hostAddress = new InetSocketAddress(hostName, hostPort);
+        aSocket.connect(hostAddress);
+        Log.logClient("Client has connect to the host");
+
         this.handler = StatusHandler.getInstance();
         this.longConnection = longConnection;
-        Log.logClient("Client has connect to the host");
     }
 
     /**
@@ -83,32 +89,26 @@ public class HttpClient {
     }
 
     private HttpResponseMessage request(HttpRequestMessage request) throws IOException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-            try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()))) {
-                pw.print(request.flatMessage());
-                pw.flush();
-                Log.testInfo(br.readLine());
-//            HttpResponseMessage httpResponseMessage = ParseResponseMessage(br);
-//            httpResponseMessage = handler.handle(this, httpResponseMessage);
-//            Log.testInfo(httpResponseMessage.flatMessage());
-            }
-        } catch (IOException e) {
-            throw new IOException();
-        }
-        Log.logClient("Request complete");
-        if (!longConnection)
-            socket.close();
-        return null;
-    }
+        try {
+            MessagePacker packer = new MessagePacker(request, null);
+            packer.send(aSocket);
 
-    /**
-     * Convert raw string to HttpResponseMessage object <br/>
-     * Referring <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages>Http Message</a>
-     * @param br Buffered reader from requests
-     * @return HttpResponseMessage object
-     */
-    private static HttpResponseMessage parseResponseMessage(BufferedReader br) {
-        // todo: ParseResponseMessage 李佳骏 邱兴驰
+            MessageParser parser = new MessageParser(aSocket, 10000);
+            HttpResponseMessage hrm = parser.parseToHttpResponseMessage();
+
+            Log.testInfo(hrm.flatMessage());
+
+            Log.logClient("Request complete");
+
+            return hrm;
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            Log.logClient("Sending failed!");
+        } catch (InvalidMessageException | TimeoutException e) {
+            e.printStackTrace();
+            Log.logClient("Parsing failed!");
+        }
+
         return null;
     }
 

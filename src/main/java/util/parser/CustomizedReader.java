@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 
 public class CustomizedReader {
     private final static
-    int TEMP_CAP = 1 << 10;
+    int TEMP_CAP = 1 << 20;
 
     private final
     AsynchronousSocketChannel socket;

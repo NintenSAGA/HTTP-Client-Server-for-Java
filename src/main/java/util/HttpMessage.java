@@ -27,6 +27,7 @@ public abstract class HttpMessage {
     public static final String HTTP11       = "HTTP/1.1";
     public static final String HTTP20       = "HTTP/2";
     public static final int ZIP_THRESHOLD   = (1 << 10);  // 1 KB
+    public static final long LARGE_FILE   = 100 * (1 << 20);  // 100 MB
 
     private static final int CHUNK_SIZE = 500;     // chunk size in char
 
@@ -163,15 +164,24 @@ public abstract class HttpMessage {
             headers.put("Content-Type", "%s; charset=UTF-8".formatted(mediaType));
         }
 
-        bodyStream = Config.getResourceAsStream(path);
+        long fileSize = Config.getSizeOfResource(path);
 
-//        byte[] bytes = Config.getResourceAsByteArray(path);
-//        setBody(bytes);
+        if (fileSize >= LARGE_FILE) {
+            Log.logServer("File[%s] size: %.2fMB".formatted(path, (double) fileSize / (1 << 20)));
+            bodyStream = Config.getResourceAsStream(path);
+        } else {
+            if (fileSize >= (1 << 20))
+                Log.logServer("File[%s] size: %.2fMB".formatted(path, (double) fileSize / (1 << 20)));
+            else
+                Log.logServer("File[%s] size: %.2fKB".formatted(path, (double) fileSize / (1 << 10)));
+            byte[] bytes = Config.getResourceAsByteArray(path);
+            bodyStream = null;
+            setBody(bytes);
 
-        // TODO: separate Content-Encoding
-//        if (body.length > ZIP_THRESHOLD) {
-//            bodyGzipEncode();
-//        }
+            if (body.length > ZIP_THRESHOLD) {
+                bodyGzipEncode();
+            }
+        }
     }
 
     /**
@@ -234,7 +244,6 @@ public abstract class HttpMessage {
         return sb.toString();
     }
 
-    @Deprecated
     private void bodyGzipEncode() {
         Log.debug("Body was zipped with GZIP");
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
