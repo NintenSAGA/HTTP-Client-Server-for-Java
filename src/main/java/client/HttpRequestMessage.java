@@ -23,13 +23,15 @@ public class HttpRequestMessage extends HttpMessage {
     public HttpRequestMessage(String method, String target) {
         super();
         this.method = method;
-        this.target = URLEncoder.encode(target, StandardCharsets.UTF_8);
+        this.target = target;
+//        this.target = URLEncoder.encode(target, StandardCharsets.UTF_8);
     }
 
     public HttpRequestMessage(String method, String target, String httpVersion, Map<String, String> headers, byte[] body) {
         super(httpVersion, headers, body);
         this.method = method;
-        this.target = URLDecoder.decode(target, StandardCharsets.UTF_8);
+        this.target = target;
+//        this.target = URLDecoder.decode(target, StandardCharsets.UTF_8);
     }
 
     public HttpRequestMessage(String method, String target, String httpVersion, Map<String, String> headers, String body) {
@@ -51,12 +53,8 @@ public class HttpRequestMessage extends HttpMessage {
     }
 
     public void setBodyAsFormUrlencoded(String body) {
-        this.addHeader("Content-Type", "application/x-www-form-urlencoded");
-        this.setBodyWithContentLength(URLEncoder.encode(body, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8));
-    }
-
-    @Override
-    public String toString() {
-        return this.flatMessage();
+        this.setBodyWithType(
+                URLEncoder.encode(body, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8),
+                "application/x-www-form-urlencoded");
     }
 }

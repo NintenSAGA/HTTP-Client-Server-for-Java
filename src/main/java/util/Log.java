@@ -57,8 +57,9 @@ public class Log {
      * @param msg test message
      */
     synchronized public static void testInfo(Object ... msg) {
-        if (test == null) return;
-        test.println(Arrays.stream(msg).map(Object::toString).collect(Collectors.joining("")));
+        String s = Arrays.stream(msg).map(Object::toString).collect(Collectors.joining(""));
+        if (test == null)   Log.debug(s);
+        else                test.println(s);
     }
 
     /**

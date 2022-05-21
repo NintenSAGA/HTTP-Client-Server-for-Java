@@ -18,7 +18,8 @@ public class ServerTests {
     public void launchTest() {
         try {
             HttpServer httpServer = new HttpServer();
-            httpServer.launch();
+            httpServer.launch(true, 10000);
+//            httpServer.launch();
         } catch (Exception e) {
             e.printStackTrace();
             fail();

@@ -1,13 +1,13 @@
-package util.packer.transencode;
+package util.packer.encode;
 
 import util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static util.consts.TransferEncoding.CONTENT_LENGTH;
+import static util.consts.Headers.CONTENT_LENGTH;
 
-public class ContentLengthStrategy extends TransEncodeStrategy {
+public class TransContentLengthStrategy extends EncodeStrategy {
     private ByteArrayInputStream bis;
     private boolean done;
 
@@ -25,9 +25,12 @@ public class ContentLengthStrategy extends TransEncodeStrategy {
 
     @Override
     protected void headerEditing() throws IOException {
+
         byte[] bytes = upper.readBytes();
         int length = bytes.length;
         bis = new ByteArrayInputStream(bytes);
+        if (length == 0) return;
+
         headers.put(CONTENT_LENGTH, String.valueOf(length));
         Log.debug("Content_length: %d".formatted(length));
         done = false;

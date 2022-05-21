@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static util.consts.TransferEncoding.CHUNKED;
+import static util.consts.Headers.CHUNKED;
 
 /**
  * Test cases for Request Message Parser and Response Message Parser<br/>

@@ -1,13 +1,13 @@
-package util.packer.transencode;
+package util.packer.encode;
 
 import java.io.IOException;
 import java.util.Map;
 
-public abstract class TransEncodeStrategy {
-    protected TransEncodeStrategy upper;
+public abstract class EncodeStrategy {
+    protected EncodeStrategy upper;
     protected Map<String, String> headers;
 
-    public TransEncodeStrategy connect(Map<String, String> headers, TransEncodeStrategy upper)
+    public EncodeStrategy connect(Map<String, String> headers, EncodeStrategy upper)
             throws IOException {
         this.headers = headers;
         this.upper = upper;

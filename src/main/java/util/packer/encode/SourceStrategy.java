@@ -1,10 +1,10 @@
-package util.packer.transencode;
+package util.packer.encode;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class SourceStrategy extends TransEncodeStrategy {
+public class SourceStrategy extends EncodeStrategy {
     private final
     InputStream inputStream;
 

@@ -41,7 +41,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
     3.5 HTTP服务器端实现长连接
 
-    - [ ] 已实现，未测试
+    - [x] 通过测试
 
     3.6 MIME至少支持三种类型，包含一种非文本类型
 
@@ -55,7 +55,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ## 1.2 任务
 
-- [x] Message Parser: `util.MessageHelper.MessageParser`. 谭子悦 李佳骏
+- [x] Message Parser: `util.MessageHelper.MessageParser`.
     - [x] Framework
     - [x] Transfer-Encoding
       - [x] Content-Length
@@ -64,7 +64,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
     - [x] Content-Encoding
       - [x] Gzip
 
-- [x] Message Packer 谭子悦
+- [x] Message Packer
 
     - [x] Framework
     - [x] Transfer-Encoding
@@ -77,9 +77,9 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.1 Http Server
 
-- [x] Main loop: `HttpServer.launch` 谭子悦
+- [x] Main loop: `HttpServer.launch`
 
-- [x] Socket Handler: `HttpServer.handleSocket` 谭子悦
+- [x] Socket Handler: `HttpServer.handleSocket`
   - [x] Short connection
   - [x] Long connection
   
@@ -89,18 +89,18 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.2 Http Client
 
-- [x] Request Methods    谭子悦
+- [x] Request Methods
   - [x] Custom request (debug only): `HttpClientrequest(HttpRequestMessage request)`
   - [x] GET request
   - [x] POST request
 - [ ] Display
   - [ ] CLI
-- [ ] Status Handler     陈骏 谭子悦
+- [ ] Status Handler
   - [x] 301 Moved Permanently
   - [x] 302 Found
   - [ ] 304 Not Modified
 
-### 1.2.3 Login System (Server only) 谭子悦
+### 1.2.3 Login System (Server only)
 
 - [x] Global Header Map
 - [x] Verification Code Generator
@@ -108,15 +108,15 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.4 Test Cases
 
-- [ ] Server Tests
+- [x] Server Tests
   - [x] Main Loop
-  - [ ] Target Handler Test (Considering manual test)
-  - [ ] MIME Test (Considering manual test)
-  - [ ] Long Connection Test
+  - [x] Long Connection Test
+  - [x] Manual Target Handler Test
+  - [x] Manual MIME Test
 - [ ] Client Tests
   - [x] Main Loop
-  - [ ] Status Handler Test 陈骏 谭子悦
-  - [x] Request Test 谭子悦 
+  - [ ] Status Handler Test
+  - [x] Request Test
 - [x] Parser and Packer Test
   - [x] Content-Length Test
   - [x] Chunked Test
@@ -128,7 +128,6 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
 ### 1.2.x Suggestions
 
-- [x] Response 和 Request Message Parser所需要进行的操作其实大致相同（只有第一行不一样），也许可以抽象出一个独立的静态方法，再让这两个方法作为该方法的 Decorator
 
 ## 1.3 代码结构图
 
@@ -226,3 +225,4 @@ Updated on Apr 16, 2022
 # 3. Notes
 
 - 不采用GZIP压缩传输时，传输稳定性会出现问题
+  - 已解决，问题并不在压缩传输或传输稳定性，在于并发问题。synchronized method只能防止同一object里的方法被并发调用，这时候不同object就可以同时访问他们共有的static member fields

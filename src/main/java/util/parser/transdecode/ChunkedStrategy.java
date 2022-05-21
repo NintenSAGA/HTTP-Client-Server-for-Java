@@ -1,7 +1,6 @@
 package util.parser.transdecode;
 
 import exception.InvalidMessageException;
-import util.Log;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -10,7 +9,7 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static util.consts.TransferEncoding.content_length;
+import static util.consts.Headers.content_length;
 
 public class ChunkedStrategy extends TransDecodeStrategy {
     @Override

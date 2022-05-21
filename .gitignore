@@ -32,3 +32,4 @@ hs_err_pid*
 
 /target/
 src/main/resources/static_html/static_files/bili_mac.dmg
+/temp/*

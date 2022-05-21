@@ -1,6 +1,7 @@
 package util.parser;
 
 import exception.InvalidMessageException;
+import util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
@@ -62,6 +63,8 @@ public class CustomizedReader {
             throws InvalidMessageException, ExecutionException,
             InterruptedException, TimeoutException {
 
+        assert tempBuffer.limit() >= n;
+
         for (int i = 0, b; i < n && (b = read()) != -1; i++) {
             tempBuffer.put((byte) b);
         }
@@ -71,13 +74,17 @@ public class CustomizedReader {
 
     // -------------------- private -------------------- //
 
-    private byte[] tempBufferPop() {
-        tempBuffer.flip();
-        byte[] ret = new byte[tempBuffer.limit()];
-        tempBuffer.get(ret);
-        tempBuffer.clear();
+    private byte[] bufferPop(ByteBuffer buffer) {
+        buffer.flip();
+        byte[] ret = new byte[buffer.limit()];
+        buffer.get(ret);
+        buffer.clear();
 
         return ret;
+    }
+
+    private byte[] tempBufferPop() {
+        return bufferPop(tempBuffer);
     }
 
     private void reload()
@@ -86,13 +93,13 @@ public class CustomizedReader {
 
         if (socket != null
                 && (byteInStream == null || byteInStream.available() == 0) ) {
-            byteBuffer.clear();
+
             var future = socket.read(byteBuffer);
             int count = future.get(timeout, TimeUnit.MILLISECONDS);
             if (count == -1)
-                throw new InvalidMessageException();
+                throw new TimeoutException();
 //            Log.debug("Reload");
-            byteInStream = new ByteArrayInputStream(byteBuffer.array());
+            byteInStream = new ByteArrayInputStream(bufferPop(byteBuffer));
         }
     }
 

@@ -18,28 +18,18 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static util.consts.ContentEncodings.content_encoding;
-import static util.consts.TransferEncoding.*;
+import static util.consts.Headers.content_encoding;
+import static util.consts.Headers.*;
 
 
 public class MessageParser {
     private final static
     int BUFFER_CAP = 1 << 20;
-    private final static
+    private
     Map<String, TransDecodeStrategy> transDecodeStrategyMap;
-    static {
-        transDecodeStrategyMap = new HashMap<>();
-        transDecodeStrategyMap.put( content_length,    new ContentLengthStrategy() );
-        transDecodeStrategyMap.put( CHUNKED,           new ChunkedStrategy() );
-    }
 
-    private final static
+    private
     Map<String, ContentDecodeStrategy> contDecodeStrategyMap;
-    static {
-        contDecodeStrategyMap = new HashMap<>();
-        contDecodeStrategyMap.put( GZIP, new GzipStrategy() );
-    }
-
 
     private
     final Map<String, String> headers;
@@ -53,16 +43,26 @@ public class MessageParser {
 
 
     // ================= Constructor ======================== //
+    private void strategyInit() {
+        transDecodeStrategyMap = new HashMap<>();
+        transDecodeStrategyMap.put( content_length,    new ContentLengthStrategy() );
+        transDecodeStrategyMap.put( CHUNKED,           new ChunkedStrategy() );
+
+        contDecodeStrategyMap = new HashMap<>();
+        contDecodeStrategyMap.put( GZIP, new GzipStrategy() );
+    }
 
     /**
      * Used for testing
      */
     public MessageParser(byte[] bytes) {
+        strategyInit();
         this.headers = new HashMap<>();
         this.customizedReader = new CustomizedReader(bytes);
     }
 
     public MessageParser(AsynchronousSocketChannel socket, int timeout) {
+        strategyInit();
         this.headers = new HashMap<>();
         this.customizedReader = new CustomizedReader(socket, ByteBuffer.allocate(BUFFER_CAP), timeout);
     }
@@ -95,10 +95,18 @@ public class MessageParser {
         // -------- 1. Start Line ----------- //
         String line = customizedReader.readLine();
 
-        startLine = line.split(" ");
-        if (startLine.length != 3) {
+        if (line.split(" ").length < 3) {
             throw new InvalidMessageException("header line: ", line);
         }
+
+        startLine = new String[3];
+        int spaceIdx = -1;
+        for (int i = 0; i < 2; i++) {
+            int from = spaceIdx + 1;
+            spaceIdx = line.indexOf(' ', from);
+            startLine[i] = line.substring(from, spaceIdx);
+        }
+        startLine[2] = line.substring(spaceIdx + 1);
 
         // -------- 2. Headers -------------- //
 
@@ -132,6 +140,7 @@ public class MessageParser {
             strategy = transDecodeStrategyMap.get(content_length);
             strategy.init(customizedReader);
             body = strategy.getBody(headers);
+            Log.debug("Read %d bytes!".formatted(body.length));
         }
 
         // -------------------- Others -------------------- //

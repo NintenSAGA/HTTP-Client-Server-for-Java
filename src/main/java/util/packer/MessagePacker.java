@@ -1,36 +1,33 @@
 package util.packer;
 
+import util.Config;
 import util.HttpMessage;
 import util.Log;
-import util.packer.transencode.ChunkedStrategy;
-import util.packer.transencode.ContentLengthStrategy;
-import util.packer.transencode.SourceStrategy;
-import util.packer.transencode.TransEncodeStrategy;
+import util.packer.encode.ContentGzipStrategy;
+import util.packer.encode.TransChunkedStrategy;
+import util.packer.encode.TransContentLengthStrategy;
+import util.packer.encode.SourceStrategy;
+import util.packer.encode.EncodeStrategy;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.WritePendingException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
-import static util.consts.TransferEncoding.*;
+import static util.consts.Headers.*;
 
 public class MessagePacker {
-    private final static
-    int TRANSPORT_SLICE_SIZE = 1 << 10;
 
-    private final static
-    Map<String, TransEncodeStrategy> strategyMap;
-    static {
-        strategyMap = new HashMap<>();
-        strategyMap.put( CONTENT_LENGTH,    new ContentLengthStrategy() );
-        strategyMap.put( CHUNKED,           new ChunkedStrategy() );
-    }
+    private final
+    Map<String, EncodeStrategy> strategyMap;
 
     private final
     HttpMessage message;
@@ -41,6 +38,8 @@ public class MessagePacker {
     AsynchronousSocketChannel socket;
     private
     Queue<byte[]> byteArrayQueue;
+    private
+    String acceptEncoding;
 
     // ==================== Constructors ==================== //
 
@@ -55,10 +54,20 @@ public class MessagePacker {
      * Use designated encoding
      */
     public MessagePacker(HttpMessage message, String[] transferEncodings) {
+        this(message, transferEncodings, "");
+    }
+
+    public MessagePacker(HttpMessage message, String[] transferEncodings, String acceptEncoding) {
         this.message = message;
         this.transferEncodings = transferEncodings;
         this.socket = null;
+        this.acceptEncoding = Objects.requireNonNullElseGet(acceptEncoding, ()->"");
+
+        strategyMap = new HashMap<>();
+        strategyMap.put( CONTENT_LENGTH,    new TransContentLengthStrategy() );
+        strategyMap.put( CHUNKED,           new TransChunkedStrategy() );
     }
+
 
     // ==================== Public ==================== //
 
@@ -95,14 +104,27 @@ public class MessagePacker {
             throws IOException, ExecutionException, InterruptedException {
         int written = 0;
 
-        // -------------------- 1. Transfer Encoding -------------------- //
         InputStream bodyStream = message.getBodyAsStream();
 
-        TransEncodeStrategy upperStrategy = new SourceStrategy(bodyStream);
+        EncodeStrategy upperStrategy = new SourceStrategy(bodyStream);
 
         if (transferEncodings == null) {
-            upperStrategy = strategyMap.get(CONTENT_LENGTH).connect(message.getHeaders(), upperStrategy);
+            // -------------------- 1. Content Encoding -------------------- //
+            /*  Only support gzip.                          */
+            /*  Can't be used without Content-Length,       */
+            /*  since length after encoding is unknown      */
+            if (acceptEncoding.contains("gzip")
+                && Integer.parseInt(
+                        message.getHeaders().getOrDefault(CONTENT_LENGTH, "0")
+                    ) >= Config.GZIP_THRESHOLD
+            ) {
+                Log.debug("Content encoded with gzip");
+                EncodeStrategy gzipStrategy = new ContentGzipStrategy();
+                upperStrategy = gzipStrategy.connect(message.getHeaders(), upperStrategy);
+            }
         } else {
+            // -------------------- 2. Transfer Encoding -------------------- //
+
             for (String te : transferEncodings) {
                 if (!strategyMap.containsKey(te))
                     Log.panic("Unsupported transfer-encoding[%s]!".formatted(te));
@@ -110,17 +132,17 @@ public class MessagePacker {
             }
         }
 
-        // -------------------- 2. Send out start line and headers -------------------- //
+        // -------------------- 3. Send out start line and headers -------------------- //
         written += flush(message.getStartLineAndHeadersAsStream());
 
-        // -------------------- 3. Send out -------------------- //
+        // -------------------- 4. Send out -------------------- //
         for (byte[] bytes; (bytes = upperStrategy.readBytes()).length != 0; ) {
             ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
             written += flush(stream);
         }
 
         if (socket != null)
-            Log.logSocket(socket,"Response sent %f KB ".formatted((double) written / (1 << 10)));
+            Log.logSocket(socket,"Message sent %f KB ".formatted((double) written / (1 << 10)));
 
         return written;
     }
@@ -130,13 +152,17 @@ public class MessagePacker {
         int written = 0;
 
         if (socket != null) {
-            for (byte[] bytes; (bytes = stream.readNBytes(TRANSPORT_SLICE_SIZE)).length != 0; ) {
-                var future = socket.write(
-                        ByteBuffer.wrap(bytes)
-                );
-                int delta = future.get();
-                assert Log.testExpect("Bytes sent", bytes.length, delta);
-                written += delta;
+            for (byte[] bytes; (bytes = stream.readNBytes(Config.SOCKET_BUFFER_SIZE)).length != 0; ) {
+                try {
+                    var future = socket.write(
+                            ByteBuffer.wrap(bytes)
+                    );
+                    int delta = future.get();
+                    assert Log.testExpect("Bytes sent", bytes.length, delta);
+                    written += delta;
+                } catch (WritePendingException e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             assert byteArrayQueue != null;

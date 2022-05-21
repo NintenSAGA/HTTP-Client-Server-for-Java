@@ -1,12 +1,13 @@
 package util.parser.transdecode;
 
 import exception.InvalidMessageException;
+import util.Log;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static util.consts.TransferEncoding.content_length;
+import static util.consts.Headers.content_length;
 
 public class ContentLengthStrategy extends TransDecodeStrategy{
     @Override
@@ -20,6 +21,7 @@ public class ContentLengthStrategy extends TransDecodeStrategy{
         }
 
         try {
+            Log.debug("Parsing %d bytes...".formatted(len));
             return reader.readNBytes(len);
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             e.printStackTrace();

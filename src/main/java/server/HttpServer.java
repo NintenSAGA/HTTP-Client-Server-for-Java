@@ -4,17 +4,14 @@ import client.HttpRequestMessage;
 import exception.InvalidMessageException;
 import org.json.JSONObject;
 import util.Config;
-import util.HttpMessage;
 import util.Log;
 import util.MessageHelper;
 import util.packer.MessagePacker;
 import util.parser.MessageParser;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketTimeoutException;
-import java.nio.ByteBuffer;
+import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -24,14 +21,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static util.consts.TransferEncoding.CHUNKED;
-import static util.consts.TransferEncoding.CONTENT_LENGTH;
+import static util.consts.Headers.ACCEPT_ENCODING;
 
 public class HttpServer {
     private final static boolean    DEFAULT_LONG_CONNECTION = false;
     private final static int        DEFAULT_TIMEOUT         = 10000;
-    private final static String[]   TRANSFER_ENCODINGS = { CHUNKED };
-//    private final static String[]   TRANSFER_ENCODINGS = null;
 
     private final AsynchronousServerSocketChannel aServerSocket;
     private final TargetHandler handler;
@@ -126,19 +120,23 @@ public class HttpServer {
      */
     private void handleSocket(AsynchronousSocketChannel socket, boolean longConnection, int timeOut) {
         Log.logSocket(socket, "Accepted");
+
         try {
+            socket.setOption(StandardSocketOptions.SO_SNDBUF, Config.SOCKET_BUFFER_SIZE);
             assert timeOut > 0;
             Log.logSocket(socket, "Long connection %sabled with timout %d".formatted(longConnection ? "en" : "dis", timeOut));
 
 
             do {
                 HttpResponseMessage responseMessage = null;
+                String acceptEncoding = "";
 
                 try {
 
                 // -------------------- 1. Receive and parse raw message to object -------------------- //
                     MessageParser parser = new MessageParser(socket, timeOut);
                     HttpRequestMessage requestMessage = parser.parseToHttpRequestMessage();
+                    acceptEncoding = requestMessage.getHeaderVal(ACCEPT_ENCODING);
 
                     Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
 
@@ -164,7 +162,11 @@ public class HttpServer {
 
                 // -------------------- 3. Pack up and send out the respond -------------------- //
                 if (responseMessage != null) {
-                    MessagePacker packer = new MessagePacker(packUp(responseMessage), TRANSFER_ENCODINGS);
+                    MessagePacker packer = new MessagePacker(
+                            packUp(responseMessage),
+                            Config.TRANSFER_ENCODINGS,
+                            acceptEncoding
+                    );
                     packer.send(socket);
                 }
 

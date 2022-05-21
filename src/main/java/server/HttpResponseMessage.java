@@ -56,11 +56,6 @@ public class HttpResponseMessage extends HttpMessage {
         mergeHeader("Set-Cookie", expr, "%s; %s"::formatted);
     }
 
-    @Override
-    public String toString() {
-        return this.flatMessage();
-    }
-
     /**
      * Returning the default status text of the corresponding status code <br/>
      * Referring to <a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Status>mdn web docs<a/>

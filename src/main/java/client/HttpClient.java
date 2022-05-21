@@ -7,31 +7,36 @@ import util.consts.WebMethods;
 import util.packer.MessagePacker;
 import util.parser.MessageParser;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
 public class HttpClient {
     private final AsynchronousSocketChannel aSocket;
     private final StatusHandler handler;
+    private final String hostName;
     private boolean longConnection;
+    private Future<Void> connectedFuture;
+    private boolean connected;
 
     public HttpClient(String hostName, int hostPort, boolean longConnection) throws IOException {
+        this.hostName = hostName;
+
         this.aSocket = AsynchronousSocketChannel.open();
         InetSocketAddress hostAddress = new InetSocketAddress(hostName, hostPort);
-        aSocket.connect(hostAddress);
-        Log.logClient("Client has connect to the host");
+        connectedFuture = aSocket.connect(hostAddress);
 
         this.handler = StatusHandler.getInstance();
         this.longConnection = longConnection;
+
+        this.connected = false;
+    }
+
+    public HttpClient(String hostName) throws IOException {
+        this(hostName, 80, false);
     }
 
     /**
@@ -90,21 +95,35 @@ public class HttpClient {
 
     private HttpResponseMessage request(HttpRequestMessage request) throws IOException {
         try {
+            if (!connected) {
+                connectedFuture.get();
+                Log.logClient("Client has connect to the host");
+                connected = true;
+            }
+
+            request.addHeader("Host", hostName);
+
             MessagePacker packer = new MessagePacker(request, null);
             packer.send(aSocket);
+
+            Log.debug(request.flatMessage());
 
             MessageParser parser = new MessageParser(aSocket, 10000);
             HttpResponseMessage hrm = parser.parseToHttpResponseMessage();
 
-            Log.testInfo(hrm.flatMessage());
+//            Log.testInfo(hrm.flatMessage());
 
             Log.logClient("Request complete");
 
             return hrm;
+        } catch (InvalidMessageException e) {
+            e.printMsg(aSocket);
+            e.printStackTrace();
+            Log.logClient("Parsing failed!");
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
             Log.logClient("Sending failed!");
-        } catch (InvalidMessageException | TimeoutException e) {
+        } catch (TimeoutException e) {
             e.printStackTrace();
             Log.logClient("Parsing failed!");
         }
