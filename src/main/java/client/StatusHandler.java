@@ -2,6 +2,7 @@ package client;
 
 import exception.InvalidMessageException;
 import server.HttpResponseMessage;
+import util.Config;
 import util.Log;
 import util.consts.Headers;
 
@@ -89,7 +90,7 @@ public class StatusHandler {
      * 304 Not Modified
      */
     private HttpResponseMessage handle304(HttpClient client, HttpResponseMessage msg) {
-        // TODO: cached content
+        msg.loadBodyFromCache(Config.CLIENT_CACHE, client.getHostName() + client.getRawTarget());
         return msg;
     }
 }

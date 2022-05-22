@@ -3,7 +3,10 @@ package client;
 import exception.InvalidMessageException;
 import lombok.Getter;
 import server.HttpResponseMessage;
+import util.Config;
+import util.HttpMessage;
 import util.Log;
+import util.consts.Headers;
 import util.consts.WebMethods;
 import util.packer.MessagePacker;
 import util.parser.MessageParser;
@@ -13,6 +16,7 @@ import java.net.InetSocketAddress;
 import java.net.URLEncoder;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
@@ -44,6 +48,8 @@ public class HttpClient {
     @Getter private
     String[] headers;
 
+    @Getter private
+    String rawTarget;
 
     public HttpClient(String hostName, int hostPort, boolean longConnection) throws IOException {
         this.hostName = hostName;
@@ -105,6 +111,7 @@ public class HttpClient {
 
         /*               Memorized for status handler               */
         this.method = method;
+        this.rawTarget = target;
         this.param = param;
         this.body = body;
         this.headers = headers;
@@ -142,6 +149,8 @@ public class HttpClient {
 
             request.addHeader("Host", hostName);
 
+            checkCache(request);
+
             MessagePacker packer = new MessagePacker(request, null);
             packer.send(aSocket);
 
@@ -153,6 +162,13 @@ public class HttpClient {
             hrm = handler.handle(this, hrm);
 
             Log.logClient("Request complete");
+
+            String content_type = hrm.getHeaderVal(Headers.CONTENT_TYPE);
+            if (    hrm.getStatusCode() != 304
+                    && content_type != null
+                    && !content_type.contains(Headers.TEXT_PLAIN)) {
+                hrm.storeBodyInCache(Config.CLIENT_CACHE, getHostName() + getRawTarget(), content_type);
+            }
 
             return hrm;
         } catch (InvalidMessageException e) {
@@ -169,5 +185,14 @@ public class HttpClient {
         }
 
         return null;
+    }
+
+    private void checkCache(HttpRequestMessage hrm) {
+        Path path = HttpMessage.getCache(Config.CLIENT_CACHE, getHostName() + getRawTarget());
+        if (path != null) {
+            String time = Config.getResourceLastModifiedTime(path);
+            Log.debug("Cache last modified: ", time);
+            hrm.addHeader(Headers.IF_MODIFIED_SINCE, time);
+        }
     }
 }

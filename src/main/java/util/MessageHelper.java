@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -34,6 +35,15 @@ public class MessageHelper {
 
     public static String getTime(Date date) {
         return sdf.format(date);
+    }
+
+    public static Date parseTime(String time) {
+        try {
+            return sdf.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**

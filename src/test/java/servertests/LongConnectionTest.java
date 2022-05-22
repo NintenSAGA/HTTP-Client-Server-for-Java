@@ -18,15 +18,13 @@ public class LongConnectionTest {
 
     @BeforeAll
     static void startUp() throws IOException {
-        Log.discardErr();
-        Log.discardStdout();
         server = new HttpServer();
         future = CompletableFuture.runAsync(() -> server.launch(true, 10000));
     }
 
     @Test
     void test1() throws IOException, InterruptedException {
-        testAndCompareWebPage("127.0.0.1", 8080, "/lab-m3", "/jyy-os");
+        testAndCompareWebPage("127.0.0.1", 8080, "/OS/2022/", "/OS/2022/labs/M3/");
     }
 
 

@@ -7,12 +7,13 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.attribute.FileTime;
-import java.util.Date;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -30,16 +31,27 @@ public abstract class HttpMessage {
 
 
     private static final Map<String, MediaType> suffixToMime;
+    private static final Map<String, String>    mimeToSuffix;
     static {
         suffixToMime = new HashMap<>();
+        mimeToSuffix = new HashMap<>();
+
         JSONObject json = Config.getConfigAsJsonObj(Config.MIME);
+
         for (String codeType : json.keySet()) {
             JSONObject codeTypeJson = json.getJSONObject(codeType);
+            /*               Each Code Type               */
             for (String type : codeTypeJson.keySet()) {
+                /*               Each Type               */
                 JSONObject temp = codeTypeJson.getJSONObject(type);
                 temp.keySet().forEach(suffix -> {
-                    MediaType mediaType = new MediaType(type, temp.getString(suffix));
+                    /*               Each Subtype               */
+                    String subtype = temp.getString(suffix);
+                    MediaType mediaType = new MediaType(type, subtype);
+
                     suffixToMime.put(suffix, mediaType);
+                    mimeToSuffix.put(mediaType.toString(), suffix);
+
                     if (codeType.equals("binary"))
                         MediaType.BINARY_TYPE.add(mediaType);
                 });
@@ -168,7 +180,7 @@ public abstract class HttpMessage {
     }
 
     public void setBodyType(String type) {
-        headers.put("Content-Type", type);
+        headers.put(CONTENT_TYPE, type);
     }
 
     public void setBodyWithType(byte[] body, String type) {
@@ -184,10 +196,10 @@ public abstract class HttpMessage {
      * Set body as plain text and calculate content-length automatically
      */
     public void setBodyAsPlainText(String body) {
-        setBodyWithType(body, "text/plain; charset=UTF-8");
+        setBodyWithType(body, "%s; %s".formatted(TEXT_PLAIN, CHARSET_UTF8));
     }
 
-    public void setBodyAsFile(String path) {
+    private void setBodyAsFile(String path, String time, long fileSize, InputStream stream) {
         String[] a = path.split("\\.");
         String suffix = a[a.length - 1];
         MediaType mediaType = suffixToMime.getOrDefault(suffix, suffixToMime.get("default"));
@@ -201,8 +213,6 @@ public abstract class HttpMessage {
             type = "%s; charset=UTF-8".formatted(mediaType);
         }
 
-        String time = Config.getResourceLastModifiedTime(path);
-        long fileSize = Config.getSizeOfResource(path);
         String size;
         if (fileSize >= (1 << 20)) {
             size = "%.2fMB".formatted((double) fileSize / (1 << 20));
@@ -214,7 +224,104 @@ public abstract class HttpMessage {
         Log.logServer("File[%s][%s][Last modified: %s]".formatted(path, size, time));
 
         setBodyType(type);
-        setBody(Config.getResourceAsStream(path), fileSize);
+        setBody(stream, fileSize);
+    }
+
+    public void setBodyAsFileWithAbsPath(Path path) {
+        try {
+            String time = Config.getResourceLastModifiedTime(path);
+            long fileSize = Config.getSizeOfResource(path);
+            InputStream stream = Files.newInputStream(path);
+
+            setBodyAsFile(path.toString(), time, fileSize, stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.debug("Setting failed!");
+        }
+
+    }
+
+    public void setBodyAsFile(String relativePath) {
+        Path path = Path.of(Config.STATIC_DIR, relativePath);
+        Log.debug("Path: ", path);
+        setBodyAsFileWithAbsPath(path);
+    }
+
+    public static Path getCachePathParent(String cacheDir, String file) {
+        file = file.trim();
+        while (file.startsWith("/")) file = file.substring(1);
+        if (file.length() == 0 || file.endsWith("/")) file += "index";
+
+        return Path.of(cacheDir, file);
+    }
+
+    public static Path getCachePath(String cacheDir, String file, String type) {
+        String typeName = type.split(";")[0].strip();
+        String suffix = mimeToSuffix.getOrDefault(typeName, "bin");
+
+        Path cachePathParent = getCachePathParent(cacheDir, file);
+
+        return Path.of(cachePathParent.toString(), "cache." + suffix);
+    }
+
+    public static Path getCache(String cacheDir, String file) {
+        Path fPath = getCachePathParent(cacheDir, file);
+        if (Files.exists(fPath)) {
+            try {
+                var optional = Files.list(fPath)
+                        .filter(p -> p.toString().matches(".*/cache\\..*$"))
+                        .findFirst();
+                if (optional.isPresent()) {
+                    Log.debug("Cache hit!");
+                    var path = optional.get();
+                    Log.debug("Cache path: %s".formatted(path.toString()));
+                    return path;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Log.debug("Cache miss!");
+        return null;
+    }
+
+//    public static String getCacheLastModified(String cacheDir, String file, String type) {
+//        Path fPath = getCachePath(cacheDir, file, type);
+//
+//        try {
+//            FileTime ft = Files.getLastModifiedTime(fPath);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return  "";
+//        }
+//    }
+
+    public void storeBodyInCache(String cacheDir, String file, String type) {
+        Path fPath = getCachePath(cacheDir, file, type);
+
+        byte[] bytes = getBodyAsBytes();
+        int length = bytes.length;
+        try {
+            Files.createDirectories(fPath.getParent());
+            Files.write(
+                    fPath,
+                    bytes,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.CREATE
+            );
+            setBody(new FileInputStream(fPath.toFile()), length);
+            Log.debug("Body cached");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.debug("Body cache setting failed! Fall back");
+            setBody(bytes);
+        }
+    }
+
+    public void loadBodyFromCache(String cacheDir, String file) {
+        Path fPath = getCache(cacheDir, file);
+        setBodyAsFileWithAbsPath(fPath);
     }
 
     // ====================== Protected ========================= //
@@ -229,17 +336,4 @@ public abstract class HttpMessage {
         return sb.toString();
     }
 
-//    private void bodyGzipEncode() {
-//        Log.debug("Body was zipped with GZIP");
-//        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-//            GZIPOutputStream gzipOut = new GZIPOutputStream(bos, true);
-//            gzipOut.write(getBodyAsBytes(), 0, body.length);
-//            gzipOut.finish();
-//            setBody(bos.toByteArray());
-//            headers.put("Content-Encoding", GZIP);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            Log.debug("Zipping failed!");
-//        }
-//    }
 }

@@ -4,6 +4,13 @@ import java.util.Locale;
 
 public class Headers {
 
+    // ==================== Content-Type ==================== //
+    public static final String CONTENT_TYPE     = "Content-Type";
+
+    public static final String TEXT_PLAIN       = "text/plain";
+
+    public static final String CHARSET_UTF8     = "charset=UTF-8";
+
     // ==================== Encodings ==================== //
     
     // -------------------- Transfer-Encoding -------------------- //
@@ -28,6 +35,9 @@ public class Headers {
 
     // ==================== Location ==================== //
     public static final String LOCATION         = "Location";
+    
+    // ==================== Cache ==================== //
+    public static final String IF_MODIFIED_SINCE= "If-Modified-Since";
     
     
 }

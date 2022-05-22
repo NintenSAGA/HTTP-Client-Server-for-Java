@@ -3,7 +3,10 @@ package server;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -15,6 +18,9 @@ import org.json.JSONObject;
 import util.Config;
 import util.HttpMessage;
 import util.Log;
+import util.MessageHelper;
+import util.consts.Headers;
+import util.consts.WebMethods;
 
 /**
  * A singleton handler
@@ -105,20 +111,27 @@ public class TargetHandler {
             target = target.toLowerCase(Locale.ROOT);
 
             if (!targetToMethod.containsKey(target)) {
-                String path = Config.STATIC_DIR + target;
-                if (ClassLoader.getSystemClassLoader().getResource(path) == null)
+                // -------------------- 1. Static Resource -------------------- //
+                Path path = getResourcePath(target);
+
+                Log.debug("Search resource in path: ", path);
+
+                if (WebMethods.GET.equals(msg.getMethod())
+                    && Files.exists(path)
+                ) {
+                    return loadStaticResource(path, msg);
+                } else {
                     target = "Missing";
-                else {
-                    HttpResponseMessage hrm = factory.produce(200);
-                    hrm.setBodyAsFile(path);
-                    return hrm;
                 }
             }
 
-            Method method = targetToMethod.get(target);
+            // -------------------- 2. Matched Target -------------------- //
 
+            /*               Check method validity               */
+            Method method = targetToMethod.get(target);
             if (Arrays.binarySearch(method.getDeclaredAnnotation(Mapping.class).method(), msg.getMethod()) < 0)
                 return factory.produce(405);
+
 
             return (HttpResponseMessage) targetToMethod.get(target).invoke(null, msg);
 
@@ -126,5 +139,29 @@ public class TargetHandler {
             e.printStackTrace();
             return factory.produce(500);
         }
+    }
+
+    private Path getResourcePath(String target) {
+        if (target.endsWith("/"))
+            target += "index.html";
+        return Path.of(Config.STATIC_DIR, target);
+    }
+
+    private HttpResponseMessage loadStaticResource(Path path, HttpRequestMessage request) {
+        Log.debug("Resource found");
+
+        if (request.containsHeader(Headers.IF_MODIFIED_SINCE)) {
+            String time = request.getHeaderVal(Headers.IF_MODIFIED_SINCE);
+            Date date = MessageHelper.parseTime(time);
+            assert date != null;
+            Date myDate = Config.getResourceLastModifiedTimeAsDate(path);
+            if (myDate.compareTo(date) < 0) {
+                return factory.produce(304);
+            }
+        }
+
+        HttpResponseMessage hrm = factory.produce(200);
+        hrm.setBodyAsFileWithAbsPath(path);
+        return hrm;
     }
 }

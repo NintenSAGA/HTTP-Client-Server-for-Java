@@ -1,8 +1,8 @@
 package clienttests;
 
-import client.HttpClient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import util.Config;
+import util.HttpMessage;
 
 import java.io.IOException;
 
@@ -19,5 +19,7 @@ public class WANTest {
 
     @Test
     public void test2() throws IOException, InterruptedException {
+        testAndCompareWebPage("jyywiki.cn", "/OS/2022/labs/L3");
+        HttpMessage.getCache(Config.CLIENT_CACHE, "jyywiki.cn/OS/2022/labs/L3");
     }
 }

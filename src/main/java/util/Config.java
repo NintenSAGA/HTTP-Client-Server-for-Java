@@ -22,10 +22,18 @@ public class Config {
     public final static String TARGET_PATH          = "target_path.json";
     public final static String MIME                 = "mime.json";
 
-    public static final String STATIC_DIR           = "static";
-    public final static String CLIENT_CACHE         = "client_cache";
-    public final static String SERVER_CACHE         = "server_cache";
-    public final static String TEST_CACHE           = "test_cache";
+    public static final String DATA_DIR;
+    static {
+        DATA_DIR = System.getProperty("user.dir") + "/Data";
+    }
+    public static final String CLIENT_PATH  = DATA_DIR + "/Client";
+    public static final String SERVER_PATH  = DATA_DIR + "/Server";
+    public static final String TEST_PATH    = DATA_DIR + "/Test";
+
+    public final static String STATIC_DIR           = SERVER_PATH   + "/Static";
+    public final static String CLIENT_CACHE         = CLIENT_PATH   + "/Cache";
+    public final static String SERVER_CACHE         = SERVER_PATH   + "/Cache";
+    public final static String TEST_CACHE           = TEST_PATH     + "/Cache";
 
     public final static int GZIP_THRESHOLD          = (1 << 20); // 1MB
 
@@ -47,6 +55,11 @@ public class Config {
 
     public static long getSizeOfResource(String resource) {
         Path path = getPath(resource);
+        assert path != null;
+        return getSizeOfResource(path);
+    }
+
+    public static long getSizeOfResource(Path path) {
         assert path != null;
         try {
             return Files.size(path);
@@ -100,6 +113,10 @@ public class Config {
         );
     }
 
+    public static Path getClientCacheDir() {
+        return getPath(Config.CLIENT_CACHE);
+    }
+
     public static String getResourceLastModifiedTime(String resource) {
         FileTime ft = Config.getResourceFileTime(resource);
         if (ft != null)
@@ -108,9 +125,25 @@ public class Config {
             return "Error";
     }
 
+    public static Date getResourceLastModifiedTimeAsDate(Path path) {
+        FileTime ft = Config.getResourceFileTime(path);
+        assert ft != null;
+        return new Date(ft.toMillis());
+    }
+
+    public static String getResourceLastModifiedTime(Path path) {
+        return MessageHelper.getTime(
+                getResourceLastModifiedTimeAsDate(path)
+        );
+    }
+
     public static FileTime getResourceFileTime(String resource) {
         Path path = getPath(resource);
         assert path != null;
+        return getResourceFileTime(path);
+    }
+
+    public static FileTime getResourceFileTime(Path path) {
         try {
             return Files.getLastModifiedTime(path);
         } catch (IOException e) {

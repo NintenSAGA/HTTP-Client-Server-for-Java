@@ -29,10 +29,9 @@ public class Util {
 
         String statusCode = hrm.getStartLineAndHeaders().split(" ")[1];
 
-        Assertions.assertEquals("200", statusCode);
 
-        String dir = System.getProperty("user.dir");
-        String tempPath = dir + "/temp";
+        String tempPath = Config.TEST_CACHE;
+        Files.createDirectories(Path.of(tempPath));
 
         var f = File.createTempFile("Actual" + hostName, ".html", Path.of(tempPath).toFile());
         var expF = File.createTempFile("Expected" + hostName, ".html", Path.of(tempPath).toFile());
