@@ -28,35 +28,39 @@ public class RequestTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        Log.discardErr();
-        PipedInputStream pipedInputStream = new PipedInputStream();
-        PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
-        Log.testInit(new PrintStream(pipedOutputStream));
-
-        br = new BufferedReader(new InputStreamReader(pipedInputStream));
         server = new HttpServer();
-        future = CompletableFuture.runAsync(() -> server.launch());
+        future = CompletableFuture.runAsync(() -> server.launch(true, 10000));
     }
 
 
     @Test
     @DisplayName("GET Method test")
     public void getTest() throws IOException {
-        new HttpClient().get("/test", null);
-        assertEquals("HTTP/1.1 200 OK", br.readLine());
+        var hrm = new HttpClient().get("/test", null);
+        String startLine = hrm.flatMessage().split("\r\n")[0];
+        assertEquals("HTTP/1.1 200 OK", startLine);
     }
 
     @Test
     @DisplayName("POST Method test")
     public void postTest() throws IOException {
-        new HttpClient().post("/register", "name=hhh&password=996", null);
-        assertEquals("HTTP/1.1 201 Created", br.readLine());
+        var hrm = new HttpClient().post("/register", "name=hhh&password=996", null);
+        String startLine = hrm.flatMessage().split("\r\n")[0];
+        assertEquals("HTTP/1.1 201 Created", startLine);
+    }
+
+    @Test
+    @DisplayName("Redirect Test")
+    public void redirectTest() throws IOException {
+        var hrm = new HttpClient("127.0.0.1", 8080, true)
+                .get("/moved", null);
+        String body = hrm.getBodyAsString();
+        assertEquals("You got the place!!!", body);
     }
 
 
     @AfterEach
-    void cleanUp() throws ExecutionException, InterruptedException, IOException {
+    void cleanUp() {
         server.shutdown();
-        br.close();
     }
 }

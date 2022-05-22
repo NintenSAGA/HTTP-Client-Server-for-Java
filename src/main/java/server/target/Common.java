@@ -18,7 +18,7 @@ public class Common extends TargetSet {
     @Mapping(value = "/test", method = WebMethods.GET)
     public static HttpResponseMessage test(HttpRequestMessage msg) {
         HttpResponseMessage hrm = factory.produce(200);
-        hrm.setBodyAsPlainText("逐梦演艺圈");
+        hrm.setBodyAsPlainText("You got the place!!!");
         return hrm;
     }
 

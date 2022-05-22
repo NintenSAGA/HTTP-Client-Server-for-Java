@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -28,7 +29,11 @@ public class MessageHelper {
      * Get the current time in GMT format
      */
     public static String getTime() {
-        return sdf.format(Calendar.getInstance().getTime());
+        return getTime(Calendar.getInstance().getTime());
+    }
+
+    public static String getTime(Date date) {
+        return sdf.format(date);
     }
 
     /**

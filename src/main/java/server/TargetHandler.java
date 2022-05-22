@@ -105,7 +105,7 @@ public class TargetHandler {
             target = target.toLowerCase(Locale.ROOT);
 
             if (!targetToMethod.containsKey(target)) {
-                String path = "static_html" + target;
+                String path = Config.STATIC_DIR + target;
                 if (ClassLoader.getSystemClassLoader().getResource(path) == null)
                     target = "Missing";
                 else {
@@ -114,6 +114,7 @@ public class TargetHandler {
                     return hrm;
                 }
             }
+
             Method method = targetToMethod.get(target);
 
             if (Arrays.binarySearch(method.getDeclaredAnnotation(Mapping.class).method(), msg.getMethod()) < 0)

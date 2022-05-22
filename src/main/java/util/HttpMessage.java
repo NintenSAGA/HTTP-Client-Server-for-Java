@@ -10,6 +10,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -198,12 +201,17 @@ public abstract class HttpMessage {
             type = "%s; charset=UTF-8".formatted(mediaType);
         }
 
+        String time = Config.getResourceLastModifiedTime(path);
         long fileSize = Config.getSizeOfResource(path);
+        String size;
+        if (fileSize >= (1 << 20)) {
+            size = "%.2fMB".formatted((double) fileSize / (1 << 20));
+        }
+        else {
+            size = "%.2fKB".formatted((double) fileSize / (1 << 10));
+        }
 
-        if (fileSize >= (1 << 20))
-            Log.logServer("File[%s] size: %.2fMB".formatted(path, (double) fileSize / (1 << 20)));
-        else
-            Log.logServer("File[%s] size: %.2fKB".formatted(path, (double) fileSize / (1 << 10)));
+        Log.logServer("File[%s][%s][Last modified: %s]".formatted(path, size, time));
 
         setBodyType(type);
         setBody(Config.getResourceAsStream(path), fileSize);

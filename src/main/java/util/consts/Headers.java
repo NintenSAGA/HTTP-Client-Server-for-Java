@@ -15,16 +15,19 @@ public class Headers {
     public final static String content_encoding = CONTENT_ENCODING.toLowerCase(Locale.ROOT);
 
     // -------------------- Accept-Encoding -------------------- //
-    public final static String ACCEPT_ENCODING = "Accept-Encoding";
-    public final static String accept_encoding = ACCEPT_ENCODING.toLowerCase(Locale.ROOT);
+    public final static String ACCEPT_ENCODING  = "Accept-Encoding";
+    public final static String accept_encoding  = ACCEPT_ENCODING.toLowerCase(Locale.ROOT);
 
     // -------------------- formats -------------------- //
-    public final static String CONTENT_LENGTH  = "Content-Length";
-    public final static String content_length  = CONTENT_LENGTH.toLowerCase(Locale.ROOT);
+    public final static String CONTENT_LENGTH   = "Content-Length";
+    public final static String content_length   = CONTENT_LENGTH.toLowerCase(Locale.ROOT);
 
-    public final static String CHUNKED         = "chunked";
-    public final static String DEFLATE         = "deflate";
-    public final static String GZIP            = "gzip";
+    public final static String CHUNKED          = "chunked";
+    public final static String DEFLATE          = "deflate";
+    public final static String GZIP             = "gzip";
+
+    // ==================== Location ==================== //
+    public static final String LOCATION         = "Location";
     
     
 }

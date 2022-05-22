@@ -83,7 +83,7 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
   - [x] Short connection
   - [x] Long connection
   
-- [x] MIME types: 谭子悦
+- [x] MIME types
   
 - [x] Target Handler
 

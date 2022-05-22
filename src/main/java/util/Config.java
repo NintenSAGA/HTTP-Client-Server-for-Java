@@ -11,6 +11,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.util.Date;
 
 import static util.consts.Headers.CHUNKED;
 
@@ -19,6 +21,11 @@ public class Config {
     public final static String DEFAULT_STATUS_TEXT  = "default_status_text.json";
     public final static String TARGET_PATH          = "target_path.json";
     public final static String MIME                 = "mime.json";
+
+    public static final String STATIC_DIR           = "static";
+    public final static String CLIENT_CACHE         = "client_cache";
+    public final static String SERVER_CACHE         = "server_cache";
+    public final static String TEST_CACHE           = "test_cache";
 
     public final static int GZIP_THRESHOLD          = (1 << 20); // 1MB
 
@@ -91,5 +98,23 @@ public class Config {
                         )
                 )
         );
+    }
+
+    public static String getResourceLastModifiedTime(String resource) {
+        FileTime ft = Config.getResourceFileTime(resource);
+        if (ft != null)
+            return MessageHelper.getTime(new Date(ft.toMillis()));
+        else
+            return "Error";
+    }
+
+    public static FileTime getResourceFileTime(String resource) {
+        Path path = getPath(resource);
+        assert path != null;
+        try {
+            return Files.getLastModifiedTime(path);
+        } catch (IOException e) {
+            return null;
+        }
     }
 }
