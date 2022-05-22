@@ -23,10 +23,11 @@ public class Config {
     public final static String TARGET_PATH          = "target_path.json";
     public final static String MIME                 = "mime.json";
 
-    public static final String DATA_DIR;
+    public static final String USER_DIR;
     static {
-        DATA_DIR = System.getProperty("user.dir") + "/Data";
+        USER_DIR = System.getProperty("user.dir");
     }
+    public static final String DATA_DIR     = USER_DIR + "/Data";
     public static final String CLIENT_PATH  = DATA_DIR + "/Client";
     public static final String SERVER_PATH  = DATA_DIR + "/Server";
     public static final String TEST_PATH    = DATA_DIR + "/Test";
@@ -42,7 +43,9 @@ public class Config {
 
     public final static String[] TRANSFER_ENCODINGS = { CHUNKED };
 
-    public final static int SOCKET_BUFFER_SIZE = 1 << 10;
+    public final static int DEFAULT_TIMEOUT         = 10000;
+    public final static boolean DEFAULT_KEEP_ALIVE  = false;
+    public final static int SOCKET_BUFFER_SIZE      = 1 << 10;
 
     private static Path getPath(String resource) {
         URL url = ClassLoader.getSystemClassLoader().getResource(resource);

@@ -201,7 +201,7 @@ public abstract class HttpMessage {
         setBodyWithType(body, "%s; %s".formatted(TEXT_PLAIN, CHARSET_UTF8));
     }
 
-    private void setBodyAsFile(String path, String time, long fileSize, InputStream stream) {
+    private void setBodyAsFile(String path, long fileSize, InputStream stream) {
         String[] a = path.split("\\.");
         String suffix = a[a.length - 1];
         MediaType mediaType = suffixToMime.getOrDefault(suffix, suffixToMime.get("default"));
@@ -223,7 +223,9 @@ public abstract class HttpMessage {
             size = "%.2fKB".formatted((double) fileSize / (1 << 10));
         }
 
-        Log.logPrompt("File packed: ", "[%s][%s][Last modified: %s]".formatted(path, size, time));
+        String pathS = path.replace(Config.USER_DIR, ".");
+
+        Log.logPrompt("File packed", "[%s][%s]".formatted(pathS, size));
 
         setBodyType(type);
         setBody(stream, fileSize);
@@ -235,7 +237,7 @@ public abstract class HttpMessage {
             long fileSize = Config.getSizeOfResource(path);
             InputStream stream = Files.newInputStream(path);
 
-            setBodyAsFile(path.toString(), time, fileSize, stream);
+            setBodyAsFile(path.toString(), fileSize, stream);
         } catch (IOException e) {
             e.printStackTrace();
             Log.debug("Setting failed!");

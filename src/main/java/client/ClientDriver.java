@@ -1,6 +1,8 @@
 package client;
 
+import exception.InvalidCommandException;
 import message.consts.WebMethods;
+import util.ArgIterator;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -21,7 +23,7 @@ public class ClientDriver {
                 The default value of the port number is 80.
                 Only support HTTP protocol (not HTTPS).
                 
-            OPTIONS                                
+            OPTIONS
                 -m <METHOD>     Send with the specified web method.
                                 Only supports GET and POST.
                                 The default value is GET.
@@ -35,55 +37,9 @@ public class ClientDriver {
                                 e.g.: User-Agent:AbaAba/0.1
             """;
 
-    private static class InvalidCommandException extends Exception {
-        public InvalidCommandException(String message) {
-            super(message);
-        }
-    }
-
-    private static class ArgIterator {
-        private final
-        String[] args;
-        private
-        int idx;
-
-        public ArgIterator(String[] args) {
-            this.args = args;
-            this.idx = 0;
-            for (String first; (first = peek()) != null && !first.startsWith("http://"); )
-                next();
-
-        }
-
-        public boolean hasNext() {
-            return idx < args.length;
-        }
-
-        public String peek() {
-            if (hasNext())
-                return args[idx];
-            else
-                return null;
-        }
-
-        public String next() {
-            if (hasNext())
-                return args[idx++];
-            else
-                return null;
-        }
-
-        public String[] nextValues() {
-            ArrayList<String> as = new ArrayList<>();
-            for (String token; (token = peek()) != null && !token.startsWith("-"); next())
-                as.add(token);
-            return as.toArray(new String[0]);
-        }
-    }
-
     public static void main(String[] args) {
         try {
-            ArgIterator ai = new ArgIterator(args);
+            ArgIterator ai = new ArgIterator(args, "http://");
 
             String raw = ai.next();
             if (raw == null || raw.startsWith("-"))
@@ -92,12 +48,8 @@ public class ClientDriver {
             URI u = new URI(raw);
 
             String hostName     = u.getHost();
-            String query        = u.getQuery();
             int port            = u.getPort();
-            String path         = u.getPath();
-
             if (port == -1) port = 80;
-            if (path == null || path.length() == 0) path = "/";
 
             String method       = WebMethods.GET;
             boolean keepAlive   = false;
@@ -116,21 +68,13 @@ public class ClientDriver {
                                 || WebMethods.POST.equals(method);
                     }
 
-                    case "--keep-alive" -> {
-                        keepAlive = true;
-                    }
+                    case "--keep-alive" -> keepAlive = true;
 
-                    case "-b" -> {
-                        body = ai.next();
-                    }
+                    case "-b" -> body = ai.next();
 
-                    case "-h" -> {
-                        headers = ai.nextValues();
-                    }
+                    case "-h" -> headers = ai.nextValues();
 
-                    default -> {
-                        throw new InvalidCommandException("Invalid token at \"%s\"".formatted(opt));
-                    }
+                    default -> throw new InvalidCommandException("Invalid token at \"%s\"".formatted(opt));
                 }
             }
 

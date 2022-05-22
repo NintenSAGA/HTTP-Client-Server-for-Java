@@ -27,8 +27,6 @@ import static message.consts.Headers.CONNECTION;
 import static message.consts.Headers.KEEP_ALIVE;
 
 public class HttpServer {
-    private final static boolean    DEFAULT_KEEP_ALIVE      = false;
-    private final static int        DEFAULT_TIMEOUT         = 10000;
 
     private final AsynchronousServerSocketChannel aServerSocket;
     private final TargetHandler handler;
@@ -66,7 +64,7 @@ public class HttpServer {
      * @param timeOut timeout for long connection
      */
     public void launch(boolean keepAlive, int timeOut) {
-        Log.logServer("The server is starting up....");
+        Log.logServer("The server is now running");
 
         try {
             while (true) {
@@ -97,7 +95,7 @@ public class HttpServer {
      * Long connection is disabled by default
      */
     public void launch() {
-        launch(DEFAULT_KEEP_ALIVE, DEFAULT_TIMEOUT);
+        launch(Config.DEFAULT_KEEP_ALIVE, Config.DEFAULT_TIMEOUT);
     }
 
     /**
