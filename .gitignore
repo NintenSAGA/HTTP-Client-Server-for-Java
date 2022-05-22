@@ -31,9 +31,14 @@ hs_err_pid*
 
 
 /target/
-src/main/resources/static_html/static_files/bili_mac.dmg
 /temp/*
 
 src/main/resources/client_cache/*
 src/main/resources/server_cache/*
 src/main/resources/test_cache/*
+
+*.js
+*.css
+css
+*.dmg
+/src/main/resources/static/M3_files/
