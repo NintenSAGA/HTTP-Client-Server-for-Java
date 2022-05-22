@@ -1,13 +1,14 @@
 package server;
 
-import client.HttpRequestMessage;
+import message.HttpRequestMessage;
 import exception.InvalidMessageException;
+import message.HttpResponseMessage;
 import org.json.JSONObject;
 import util.Config;
 import util.Log;
-import util.MessageHelper;
-import util.packer.MessagePacker;
-import util.parser.MessageParser;
+import message.MessageHelper;
+import message.packer.MessagePacker;
+import message.parser.MessageParser;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -21,10 +22,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static util.consts.Headers.ACCEPT_ENCODING;
+import static message.consts.Headers.ACCEPT_ENCODING;
+import static message.consts.Headers.CONNECTION;
+import static message.consts.Headers.KEEP_ALIVE;
 
 public class HttpServer {
-    private final static boolean    DEFAULT_LONG_CONNECTION = false;
+    private final static boolean    DEFAULT_KEEP_ALIVE      = false;
     private final static int        DEFAULT_TIMEOUT         = 10000;
 
     private final AsynchronousServerSocketChannel aServerSocket;
@@ -59,10 +62,10 @@ public class HttpServer {
     /**
      * Start up the main loop <br/>
      * Should handle each new connection with a new thread
-     * @param longConnection whether long connection is enabled
+     * @param keepAlive whether Keep-Alive is enabled
      * @param timeOut timeout for long connection
      */
-    public void launch(boolean longConnection, int timeOut) {
+    public void launch(boolean keepAlive, int timeOut) {
         Log.logServer("The server is starting up....");
 
         try {
@@ -73,7 +76,7 @@ public class HttpServer {
                     public void completed(AsynchronousSocketChannel result, Object attachment) {
                         if (aServerSocket.isOpen())
                             aServerSocket.accept(null, this);
-                        handleSocket(result, longConnection, timeOut);
+                        handleSocket(result, keepAlive, timeOut);
                     }
 
                     @Override
@@ -94,7 +97,7 @@ public class HttpServer {
      * Long connection is disabled by default
      */
     public void launch() {
-        launch(DEFAULT_LONG_CONNECTION, DEFAULT_TIMEOUT);
+        launch(DEFAULT_KEEP_ALIVE, DEFAULT_TIMEOUT);
     }
 
     /**
@@ -118,13 +121,13 @@ public class HttpServer {
      * Should be packed in a Thread <br/>
      * Socket handler --> TargetHandler --> Output handler <br/>
      */
-    private void handleSocket(AsynchronousSocketChannel socket, boolean longConnection, int timeOut) {
+    private void handleSocket(AsynchronousSocketChannel socket, boolean keepAlive, int timeOut) {
         Log.logSocket(socket, "Accepted");
 
         try {
             socket.setOption(StandardSocketOptions.SO_SNDBUF, Config.SOCKET_BUFFER_SIZE);
             assert timeOut > 0;
-            Log.logSocket(socket, "Long connection %sabled with timout %d".formatted(longConnection ? "en" : "dis", timeOut));
+            Log.logSocket(socket, "Keep-Alive %sabled with timout %d".formatted(keepAlive ? "en" : "dis", timeOut));
 
 
             do {
@@ -136,9 +139,13 @@ public class HttpServer {
                 // -------------------- 1. Receive and parse raw message to object -------------------- //
                     MessageParser parser = new MessageParser(socket, timeOut);
                     HttpRequestMessage requestMessage = parser.parseToHttpRequestMessage();
-                    acceptEncoding = requestMessage.getHeaderVal(ACCEPT_ENCODING);
 
                     Log.logSocket(socket, "Message received, target: " + requestMessage.getTarget());
+
+                    /*               Header setting               */
+                    acceptEncoding = requestMessage.getHeaderVal(ACCEPT_ENCODING);
+                    if (!KEEP_ALIVE.equals(requestMessage.getHeaderVal(CONNECTION)))
+                        keepAlive = false;
 
                 // -------------------- 2. Handle the request and generate response -------------------- //
                     responseMessage = handler.handle(requestMessage);
@@ -146,22 +153,24 @@ public class HttpServer {
                 /*               Error Handling               */
                 } catch (TimeoutException e) {
                     Log.logSocket(socket, "Socket timeout");
-                    longConnection = false;
+                    keepAlive = false;
                 } catch (InvalidMessageException e) {
                     e.printStackTrace();
                     Log.logSocket(socket, "Invalid message occurs");
                     e.printMsg(socket);
-                    longConnection = false;
+                    keepAlive = false;
                     responseMessage = badRequest();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    longConnection = false;
+                    keepAlive = false;
                     responseMessage = internalError();
                 }
                 /*               Error Handling               */
 
                 // -------------------- 3. Pack up and send out the respond -------------------- //
                 if (responseMessage != null) {
+                    if (keepAlive) responseMessage.addHeader(CONNECTION, KEEP_ALIVE);
+
                     MessagePacker packer = new MessagePacker(
                             packUp(responseMessage),
                             Config.TRANSFER_ENCODINGS,
@@ -170,7 +179,7 @@ public class HttpServer {
                     packer.send(socket);
                 }
 
-            } while (longConnection);
+            } while (keepAlive);
 
             Log.logSocket(socket, "Connection closed");
             socket.close();
@@ -193,6 +202,7 @@ public class HttpServer {
     private HttpResponseMessage packUp(HttpResponseMessage msg) {
         msg.putAllHeaders(this.globalHeaders);
         msg.addHeader("Date", MessageHelper.getTime());
+
         return msg;
     }
 

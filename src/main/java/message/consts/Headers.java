@@ -1,4 +1,4 @@
-package util.consts;
+package message.consts;
 
 import java.util.Locale;
 
@@ -38,6 +38,13 @@ public class Headers {
     
     // ==================== Cache ==================== //
     public static final String IF_MODIFIED_SINCE= "If-Modified-Since";
-    
-    
+
+    // ==================== Connection ==================== //
+    public static final String CONNECTION       = "Connection";
+    public static final String KEEP_ALIVE       = "keep-alive";
+
+
+    public static final String USER_AGENT       = "User-Agent";
+    public static final String ACCEPT           = "Accept";
+
 }

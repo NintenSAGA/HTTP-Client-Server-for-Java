@@ -1,13 +1,13 @@
-package util.packer;
+package message.packer;
 
 import util.Config;
-import util.HttpMessage;
+import message.HttpMessage;
 import util.Log;
-import util.packer.encode.ContentGzipStrategy;
-import util.packer.encode.TransChunkedStrategy;
-import util.packer.encode.TransContentLengthStrategy;
-import util.packer.encode.SourceStrategy;
-import util.packer.encode.EncodeStrategy;
+import message.packer.encode.ContentGzipStrategy;
+import message.packer.encode.TransChunkedStrategy;
+import message.packer.encode.TransContentLengthStrategy;
+import message.packer.encode.SourceStrategy;
+import message.packer.encode.EncodeStrategy;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
-import static util.consts.Headers.*;
+import static message.consts.Headers.*;
 
 public class MessagePacker {
 

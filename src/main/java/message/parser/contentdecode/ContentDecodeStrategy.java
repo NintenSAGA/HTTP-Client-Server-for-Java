@@ -1,4 +1,4 @@
-package util.parser.contentdecode;
+package message.parser.contentdecode;
 
 import java.util.Map;
 

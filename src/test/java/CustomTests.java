@@ -36,36 +36,5 @@ public class CustomTests {
                 " error，而只有最终虚拟机神秘卡死/重启/输出奇怪内容，我才真正证明了程序里 bug 的存在 (failure)。");
     }
 
-    @Test
-    public void customTestJson() {
-        try {
-            Process p = Runtime.getRuntime().exec("""
-                    /usr/bin/curl --location --request GET 'http://127.0.0.1:8080/moved' \\
-                    --header 'Content-Type: text/plain' \\
-                    --data-raw 'This is a test message'""");
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(p.getErrorStream())
-            );
-            System.out.println(br.readLine());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
-    @Test
-    public void customNio2Test() throws IOException, ExecutionException, InterruptedException {
-        var socket = AsynchronousServerSocketChannel.open();
-        socket.bind(new InetSocketAddress("127.0.0.1", 8080));
-        var future = socket.accept();
-        var s = future.get();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(1 << 20);
-        s.read(byteBuffer);
-        byteBuffer.flip();
-        BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(new ByteArrayInputStream(byteBuffer.array()))
-        );
-        for (String line; !(line = bufferedReader.readLine()).isEmpty(); ) {
-            System.out.println(line);
-        }
-    }
 }

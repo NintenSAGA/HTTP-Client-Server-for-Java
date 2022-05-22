@@ -1,10 +1,10 @@
 package client;
 
 import exception.InvalidMessageException;
-import server.HttpResponseMessage;
+import message.HttpResponseMessage;
 import util.Config;
 import util.Log;
-import util.consts.Headers;
+import message.consts.Headers;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -48,26 +48,31 @@ public class StatusHandler {
     private HttpResponseMessage redirect(HttpClient client, HttpResponseMessage msg)
             throws IOException, InvalidMessageException {
         HttpClient nextClient;
-        if (client.isLongConnection() && client.getASocket().isOpen())
+        if (client.isKeepAlive() && client.getASocket().isOpen())
             nextClient = client;
         else
-            nextClient = new HttpClient(client.getHostName(), client.getHostPort(), client.isLongConnection());
+            nextClient = new HttpClient(client.getHostName(), client.getHostPort(), client.isKeepAlive());
 
-        String nextTarget = msg.getHeaderVal(Headers.LOCATION);
-        if (nextTarget == null) throw new InvalidMessageException("Invalid location");
+        String nextUri = msg.getHeaderVal(Headers.LOCATION);
+        if (nextUri == null) throw new InvalidMessageException("Invalid location");
+
+        if (nextUri.startsWith("https")) {
+            Log.logClient("Redirection to HTTPS is prohibited.");
+            return msg;
+        }
 
         try {
-            return redirect(nextTarget, client, nextClient, msg);
+            return redirect(nextUri, client, nextClient, msg);
         } catch (IOException e) {
             Log.logClient("fall back to long connection disabled");
-            nextClient = new HttpClient(client.getHostName(), client.getHostPort(), client.isLongConnection());
-            return redirect(nextTarget, client, nextClient,msg);
+            nextClient = new HttpClient(client.getHostName(), client.getHostPort(), client.isKeepAlive());
+            return redirect(nextUri, client, nextClient,msg);
         }
     }
 
     private HttpResponseMessage redirect(String nextTarget, HttpClient client, HttpClient nextClient, HttpResponseMessage msg)
             throws IOException {
-        return nextClient.request(client.getMethod(), nextTarget, client.getParam(), client.getBody(), client.getHeaders());
+        return nextClient.request(client.getMethod(), nextTarget, client.getBody(), client.getHeaders());
     }
 
     /**
@@ -90,7 +95,7 @@ public class StatusHandler {
      * 304 Not Modified
      */
     private HttpResponseMessage handle304(HttpClient client, HttpResponseMessage msg) {
-        msg.loadBodyFromCache(Config.CLIENT_CACHE, client.getHostName() + client.getRawTarget());
+        msg.loadBodyFromCache(Config.CLIENT_CACHE, client.getHostName() + client.getRawPath());
         return msg;
     }
 }

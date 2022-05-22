@@ -13,7 +13,7 @@ import java.nio.file.Path;
 public class Util {
 
     public static void testAndCompareWebPage(String hostName, int port, String ... targets) throws IOException, InterruptedException {
-        HttpClient client = new HttpClient(hostName, port);
+        HttpClient client = new HttpClient(hostName, port, true);
 
         for (var target : targets) {
             comparePage(client, hostName, port, target);
@@ -25,7 +25,7 @@ public class Util {
 
     public static void comparePage(HttpClient client, String hostName, int port, String target) throws IOException, InterruptedException {
         String param = null;
-        var hrm = client.get(target, param);
+        var hrm = client.get(target);
 
         String statusCode = hrm.getStartLineAndHeaders().split(" ")[1];
 

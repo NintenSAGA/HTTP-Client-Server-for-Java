@@ -1,11 +1,11 @@
-package util.packer.encode;
+package message.packer.encode;
 
 import util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static util.consts.Headers.CONTENT_LENGTH;
+import static message.consts.Headers.CONTENT_LENGTH;
 
 public class TransContentLengthStrategy extends EncodeStrategy {
     private ByteArrayInputStream bis;

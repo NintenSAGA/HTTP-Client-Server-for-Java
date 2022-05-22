@@ -1,4 +1,4 @@
-package util.packer.encode;
+package message.packer.encode;
 
 import java.io.IOException;
 import java.util.Map;

@@ -1,13 +1,13 @@
-package util.packer.encode;
+package message.packer.encode;
 
 import util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static util.consts.Headers.CONTENT_LENGTH;
-import static util.consts.Headers.CHUNKED;
-import static util.consts.Headers.TRANSFER_ENCODING;
+import static message.consts.Headers.CONTENT_LENGTH;
+import static message.consts.Headers.CHUNKED;
+import static message.consts.Headers.TRANSFER_ENCODING;
 
 public class TransChunkedStrategy extends EncodeStrategy {
     private static final int CHUNK_SIZE = 800;     // chunk size in bytes

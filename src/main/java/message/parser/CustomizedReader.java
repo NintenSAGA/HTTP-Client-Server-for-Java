@@ -1,7 +1,6 @@
-package util.parser;
+package message.parser;
 
 import exception.InvalidMessageException;
-import util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;

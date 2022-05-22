@@ -1,14 +1,14 @@
-package util.parser;
+package message.parser;
 
-import client.HttpRequestMessage;
+import message.HttpRequestMessage;
 import exception.InvalidMessageException;
-import server.HttpResponseMessage;
+import message.HttpResponseMessage;
 import util.Log;
-import util.parser.contentdecode.ContentDecodeStrategy;
-import util.parser.contentdecode.GzipStrategy;
-import util.parser.transdecode.ChunkedStrategy;
-import util.parser.transdecode.ContentLengthStrategy;
-import util.parser.transdecode.TransDecodeStrategy;
+import message.parser.contentdecode.ContentDecodeStrategy;
+import message.parser.contentdecode.GzipStrategy;
+import message.parser.transdecode.ChunkedStrategy;
+import message.parser.transdecode.ContentLengthStrategy;
+import message.parser.transdecode.TransDecodeStrategy;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static util.consts.Headers.content_encoding;
-import static util.consts.Headers.*;
+import static message.consts.Headers.content_encoding;
+import static message.consts.Headers.*;
 
 
 public class MessageParser {
@@ -123,7 +123,6 @@ public class MessageParser {
 
         transferDecode();
 
-
         if (body == null) body = new byte[0];
         else {
             contentDecode();
@@ -166,6 +165,7 @@ public class MessageParser {
                 body = strategy.getBody(headers);
             }
 
+            headers.remove(transfer_encoding);
         }
     }
 

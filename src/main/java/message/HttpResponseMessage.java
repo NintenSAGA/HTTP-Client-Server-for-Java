@@ -1,10 +1,9 @@
-package server;
+package message;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONObject;
 import util.Config;
-import util.HttpMessage;
 
 import java.util.HashMap;
 import java.util.Map;

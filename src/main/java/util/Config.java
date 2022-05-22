@@ -1,5 +1,6 @@
 package util;
 
+import message.MessageHelper;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -14,7 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.Date;
 
-import static util.consts.Headers.CHUNKED;
+import static message.consts.Headers.CHUNKED;
 
 public class Config {
     public final static String GLOBAL_HEADERS       = "global_headers.json";

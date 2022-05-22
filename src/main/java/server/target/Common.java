@@ -1,11 +1,10 @@
 package server.target;
 
-import client.HttpRequestMessage;
-import server.HttpResponseMessage;
+import message.HttpRequestMessage;
+import message.HttpResponseMessage;
 import server.Mapping;
-import util.Config;
 import util.Log;
-import util.consts.WebMethods;
+import message.consts.WebMethods;
 
 public class Common extends TargetSet {
     @Mapping(value = "Missing", method = {WebMethods.GET, WebMethods.POST})

@@ -2,6 +2,7 @@ package loginsystemtests;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -24,15 +25,14 @@ public class LoginSystemTests {
     static String cookie = null;
 
     @BeforeAll
-    static void startUp() throws IOException {
-        Log.discardErr();
-        Log.discardStdout();
+    static void startUp() throws IOException, InterruptedException {
         server = new HttpServer();
-        future = CompletableFuture.runAsync(server::launch);
+        future = CompletableFuture.runAsync(() -> server.launch(true, 10000));
+
     }
 
     @Test
-    @Order(1)
+    @Disabled
     @DisplayName("Register Test")
     public void register() throws IOException, InterruptedException {
         var pb = new ProcessBuilder();
@@ -41,6 +41,7 @@ public class LoginSystemTests {
                     "--data-urlencode", "name=%s&password=%s".formatted(NAME, PASS));
         var p = pb.start();
         p.waitFor();
+
         assertEquals("Registered successfully", p.inputReader().readLine());
         String line;
         while ((line = p.errorReader().readLine()) != null) {
@@ -55,9 +56,8 @@ public class LoginSystemTests {
                     "--header", "Cookie: " + cookie);
         p = pb.start();
         p.waitFor();
-        assertEquals("You've logged in as %s".formatted(NAME), p.inputReader().readLine());
 
-        
+        assertEquals("You've logged in as %s".formatted(NAME), p.inputReader().readLine());
     }
 
     @AfterAll

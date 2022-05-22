@@ -1,7 +1,7 @@
-package util.parser.transdecode;
+package message.parser.transdecode;
 
 import exception.InvalidMessageException;
-import util.parser.CustomizedReader;
+import message.parser.CustomizedReader;
 
 import java.util.Map;
 

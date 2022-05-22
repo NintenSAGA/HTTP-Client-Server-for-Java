@@ -1,4 +1,4 @@
-package util.parser.contentdecode;
+package message.parser.contentdecode;
 
 import util.Log;
 
@@ -18,7 +18,8 @@ public class GzipStrategy implements ContentDecodeStrategy {
                 new ByteArrayInputStream(bytes)
             )
         ) {
-            return gzipIn.readAllBytes();
+            byte[] b = gzipIn.readAllBytes();
+            return b;
         } catch (IOException e) {
             e.printStackTrace();
             return new byte[0];

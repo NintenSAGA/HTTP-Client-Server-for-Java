@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import server.HttpServer;
-import util.Log;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -12,14 +11,14 @@ import java.util.concurrent.ExecutionException;
 
 import static util.Util.*;
 
-public class LongConnectionTest {
+public class KeepAliveTest {
     static HttpServer server;
     static CompletableFuture<Void> future;
 
     @BeforeAll
     static void startUp() throws IOException {
         server = new HttpServer();
-        future = CompletableFuture.runAsync(() -> server.launch(true, 10000));
+        future = CompletableFuture.runAsync(() -> server.launch(true, 100000));
     }
 
     @Test

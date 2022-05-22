@@ -1,4 +1,4 @@
-package util.packer.encode;
+package message.packer.encode;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

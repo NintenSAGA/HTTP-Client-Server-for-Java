@@ -1,11 +1,7 @@
-package util;
+package message;
 
-import client.HttpRequestMessage;
-import server.HttpResponseMessage;
+import message.HttpRequestMessage;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -13,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;

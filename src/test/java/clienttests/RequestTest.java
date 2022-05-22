@@ -29,7 +29,7 @@ public class RequestTest {
     @Test
     @DisplayName("GET Method test")
     public void getTest() throws IOException {
-        var hrm = new HttpClient().get("/test", null);
+        var hrm = new HttpClient().get("/test");
         String startLine = hrm.flatMessage().split("\r\n")[0];
         assertEquals("HTTP/1.1 200 OK", startLine);
     }
@@ -37,7 +37,7 @@ public class RequestTest {
     @Test
     @DisplayName("POST Method test")
     public void postTest() throws IOException {
-        var hrm = new HttpClient().post("/register", "name=hhh&password=996", null);
+        var hrm = new HttpClient().post("/register?name=hhh&password=996", null);
         String startLine = hrm.flatMessage().split("\r\n")[0];
         assertEquals("HTTP/1.1 201 Created", startLine);
     }
@@ -46,7 +46,7 @@ public class RequestTest {
     @DisplayName("Redirect Test")
     public void redirectTest() throws IOException {
         var hrm = new HttpClient("127.0.0.1", 8080, true)
-                .get("/moved", null);
+                .get("/moved");
         String body = hrm.getBodyAsString();
         assertEquals("You got the place!!!", body);
     }
@@ -55,10 +55,10 @@ public class RequestTest {
     @DisplayName("304 Cache Test")
     public void cacheTest() throws IOException, InterruptedException {
         HttpClient client = new HttpClient();
-        client.get("/OS/2022/", null);
+        client.get("/OS/2022/");
 
         client = new HttpClient();
-        var hrm = client.get("/OS/2022/", null);
+        var hrm = client.get("/OS/2022/");
 
         assert "304".equals(hrm.getStartLineAndHeaders().split(" ")[1]);
 

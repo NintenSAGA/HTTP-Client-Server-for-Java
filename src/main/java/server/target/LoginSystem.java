@@ -1,13 +1,13 @@
 package server.target;
 
-import client.HttpRequestMessage;
+import message.HttpRequestMessage;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import server.HttpResponseMessage;
+import message.HttpResponseMessage;
 import server.Mapping;
 import util.Log;
-import util.MessageHelper;
-import util.consts.WebMethods;
+import message.MessageHelper;
+import message.consts.WebMethods;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static util.MessageHelper.parseArgs;
+import static message.MessageHelper.parseArgs;
 
 public class LoginSystem extends TargetSet {
     @AllArgsConstructor

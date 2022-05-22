@@ -1,5 +1,6 @@
 package server;
 
+import message.HttpResponseMessage;
 import util.Log;
 
 import java.lang.reflect.InvocationTargetException;

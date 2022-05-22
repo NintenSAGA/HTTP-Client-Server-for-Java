@@ -1,7 +1,6 @@
-package util.packer.encode;
+package message.packer.encode;
 
-import util.Log;
-import util.consts.Headers;
+import message.consts.Headers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -13,14 +13,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import client.HttpRequestMessage;
+import message.HttpRequestMessage;
+import message.HttpResponseMessage;
 import org.json.JSONObject;
 import util.Config;
-import util.HttpMessage;
+import message.HttpMessage;
 import util.Log;
-import util.MessageHelper;
-import util.consts.Headers;
-import util.consts.WebMethods;
+import message.MessageHelper;
+import message.consts.Headers;
+import message.consts.WebMethods;
 
 /**
  * A singleton handler
@@ -38,7 +39,7 @@ public class TargetHandler {
 
         supportedMethods = new HashSet<>();
         try {
-            Class<?> methods = Class.forName("util.consts.WebMethods");
+            Class<?> methods = Class.forName("message.consts.WebMethods");
             for (Field field : methods.getDeclaredFields())
                 supportedMethods.add(field.getName());
         } catch (ClassNotFoundException e) {

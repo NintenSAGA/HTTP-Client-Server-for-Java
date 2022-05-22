@@ -2,19 +2,21 @@ import exception.InvalidMessageException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import server.HttpResponseMessage;
+import message.HttpResponseMessage;
 import server.ResponseMessageFactory;
 import util.Config;
-import util.packer.MessagePacker;
-import util.parser.MessageParser;
+import message.packer.MessagePacker;
+import message.parser.MessageParser;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static util.consts.Headers.CHUNKED;
+import static message.consts.Headers.CHUNKED;
 
 /**
  * Test cases for Request Message Parser and Response Message Parser<br/>
@@ -69,11 +71,11 @@ public class PackerAndParserTest {
     private void fileGzipTest(String[] transferEncodings)
                 throws IOException, ExecutionException, InterruptedException,
                 InvalidMessageException, TimeoutException {
-        String resource = "static_html/static_files/cute_rabbit.jpeg";
         HttpResponseMessage hrm = ResponseMessageFactory.getInstance().produce(200);
-        hrm.setBodyAsFile(resource);
+        Path path = Path.of(Config.STATIC_DIR, "cute_rabbit.jpeg");
+        hrm.setBodyAsFileWithAbsPath(path);
 
-        byte[] exp = Config.getResourceAsByteArray(resource);
+        byte[] exp = Files.newInputStream(path).readAllBytes();
 
         MessagePacker packer = new MessagePacker(hrm, transferEncodings);
         MessageParser parser = new MessageParser(packer.toByteArray());

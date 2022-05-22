@@ -1,10 +1,5 @@
 package server.target;
 
-import client.HttpRequestMessage;
-import server.HttpResponseMessage;
-import server.Mapping;
-import util.Config;
-
 public class Html extends TargetSet {
 //    @Mapping("/lab-m3")
 //    public static HttpResponseMessage labM3(HttpRequestMessage msg) {

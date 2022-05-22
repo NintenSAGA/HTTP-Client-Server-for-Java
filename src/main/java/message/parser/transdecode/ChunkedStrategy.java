@@ -1,4 +1,4 @@
-package util.parser.transdecode;
+package message.parser.transdecode;
 
 import exception.InvalidMessageException;
 
@@ -9,7 +9,7 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static util.consts.Headers.content_length;
+import static message.consts.Headers.content_length;
 
 public class ChunkedStrategy extends TransDecodeStrategy {
     @Override
@@ -32,8 +32,6 @@ public class ChunkedStrategy extends TransDecodeStrategy {
             ByteBuffer byteBuffer = ByteBuffer.allocate(sumLen);
             while (!queue.isEmpty())
                 byteBuffer.put(queue.poll());
-
-            headers.put(content_length, String.valueOf(sumLen));
 
             return byteBuffer.array();
         } catch (NumberFormatException e) {

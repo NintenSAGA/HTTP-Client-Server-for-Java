@@ -1,9 +1,11 @@
-package util;
+package message;
 
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import org.json.JSONObject;
+import util.Config;
+import util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,7 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-import static util.consts.Headers.*;
+import static message.consts.Headers.*;
 
 public abstract class HttpMessage {
     public static final String HTTP10       = "HTTP/1";
@@ -221,7 +223,7 @@ public abstract class HttpMessage {
             size = "%.2fKB".formatted((double) fileSize / (1 << 10));
         }
 
-        Log.logServer("File[%s][%s][Last modified: %s]".formatted(path, size, time));
+        Log.logPrompt("File packed: ", "[%s][%s][Last modified: %s]".formatted(path, size, time));
 
         setBodyType(type);
         setBody(stream, fileSize);

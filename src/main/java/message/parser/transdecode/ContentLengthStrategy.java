@@ -1,4 +1,4 @@
-package util.parser.transdecode;
+package message.parser.transdecode;
 
 import exception.InvalidMessageException;
 import util.Log;
@@ -7,12 +7,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static util.consts.Headers.content_length;
+import static message.consts.Headers.content_length;
 
 public class ContentLengthStrategy extends TransDecodeStrategy{
     @Override
     public byte[] getBody(Map<String, String> headers) throws InvalidMessageException {
         String lenStr = headers.get(content_length);
+        headers.remove(content_length);
         int len;
         try {
             len = Integer.parseInt(lenStr);
