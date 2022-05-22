@@ -35,6 +35,8 @@ public class Config {
     public final static String SERVER_CACHE         = SERVER_PATH   + "/Cache";
     public final static String TEST_CACHE           = TEST_PATH     + "/Cache";
 
+    public static final String DOWNLOAD_PATH        = DATA_DIR      + "/Download";
+
     public final static int GZIP_THRESHOLD          = (1 << 20); // 1MB
 
     public final static String[] TRANSFER_ENCODINGS = { CHUNKED };

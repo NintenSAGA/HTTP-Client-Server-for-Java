@@ -25,11 +25,11 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
 
     3.1 HTTP客户端可以发送请求报文、呈现响应报文（命令行和GUI都可以）
 
-    - [ ] TBD
+    - [ ] 未完全完成
 
     3.2 HTTP客户端对301、302、304的状态码做相应的处理
 
-    - [ ] 未完全完成，未测试
+    - [x] 通过测试
 
     3.3 HTTP服务器端支持GET和POST请求
 
@@ -95,10 +95,10 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
   - [x] POST request
 - [ ] Display
   - [ ] CLI
-- [ ] Status Handler
+- [x] Status Handler
   - [x] 301 Moved Permanently
   - [x] 302 Found
-  - [ ] 304 Not Modified
+  - [x] 304 Not Modified
 
 ### 1.2.3 Login System (Server only)
 
@@ -113,84 +113,103 @@ Term project for Internet Computing (2022, Spring), aiming to implement HTTP cli
   - [x] Long Connection Test
   - [x] Manual Target Handler Test
   - [x] Manual MIME Test
-- [ ] Client Tests
+- [x] Client Tests
   - [x] Main Loop
-  - [ ] Status Handler Test
+  - [x] Status Handler Test
   - [x] Request Test
 - [x] Parser and Packer Test
   - [x] Content-Length Test
   - [x] Chunked Test
   - [x] File Tests
-- [ ] Login System Tests
+- [x] Login System Tests
   - [x] Register
-  - [ ] Login
-  - [ ] Status
+  - [x] Manual tests
 
 ### 1.2.x Suggestions
 
 
 ## 1.3 代码结构图
 
-Updated on Apr 16, 2022
+Updated on May 22, 2022
 
 ```
 .
-        ├── main
-        │   ├── java
-        │   │   ├── client
-        │   │   │   ├── HttpClient.java
-        │   │   │   ├── HttpRequestMessage.java
-        │   │   │   └── StatusHandler.java
-        │   │   ├── exception
-        │   │   │   └── InvalidMessageException.java
-        │   │   ├── server
-        │   │   │   ├── HttpResponseMessage.java
-        │   │   │   ├── HttpServer.java
-        │   │   │   ├── Mapping.java
-        │   │   │   ├── ResponseMessageFactory.java
-        │   │   │   ├── TargetHandler.java
-        │   │   │   └── target
-        │   │   │       ├── Common.java
-        │   │   │       ├── Html.java
-        │   │   │       ├── LoginSystem.java
-        │   │   │       └── TargetSet.java
-        │   │   └── util
-        │   │       ├── Config.java
-        │   │       ├── HttpMessage.java
-        │   │       ├── Log.java
-        │   │       ├── MessageHelper.java
-        │   │       ├── consts
-        │   │       │   ├── TransferEncoding.java
-        │   │       │   └── WebMethods.java
-        │   │       └── parser
-        │   │           ├── CustomizedReader.java
-        │   │           ├── MessageParser.java
-        │   │           └── transdecode
-        │   │               ├── ChunkedStrategy.java
-        │   │               ├── ContentLengthStrategy.java
-        │   │               ├── DeflateStrategy.java
-        │   │               ├── GzipStrategy.java
-        │   │               └── TransDecodeStrategy.java
-        │   └── resources
-        │       ├── default_status_text.json
-        │       ├── global_headers.json
-        │       ├── mime.json
-        │       └── static_html
-        └── test
-            └── java
-                ├── CustomTests.java
-                ├── PackerAndParserTest.java
-                ├── clienttests
-                │   ├── RequestTest.java
-                │   └── StatusHandlerTest.java
-                ├── loginsystemtests
-                │   └── LoginSystemTests.java
-                └── servertests
-                ├── LongConnectionTest.java
-                ├── MIMETest.java
-                ├── ServerTests.java
-                └── TargetHandlerTest.java
-
+├── Data
+│   ├── Client
+│   ├── Server
+│   └── Test
+├── README.md
+├── docs
+├── pom.xml
+└── src
+    ├── main
+    │   ├── java
+    │   │   ├── client
+    │   │   │   ├── ClientDriver.java
+    │   │   │   ├── HttpClient.java
+    │   │   │   ├── HttpRequestMessage.java
+    │   │   │   └── StatusHandler.java
+    │   │   ├── exception
+    │   │   │   └── InvalidMessageException.java
+    │   │   ├── server
+    │   │   │   ├── HttpResponseMessage.java
+    │   │   │   ├── HttpServer.java
+    │   │   │   ├── Mapping.java
+    │   │   │   ├── ResponseMessageFactory.java
+    │   │   │   ├── TargetHandler.java
+    │   │   │   └── target
+    │   │   │       ├── Common.java
+    │   │   │       ├── Html.java
+    │   │   │       ├── LoginSystem.java
+    │   │   │       └── TargetSet.java
+    │   │   └── util
+    │   │       ├── Config.java
+    │   │       ├── HttpMessage.java
+    │   │       ├── Log.java
+    │   │       ├── MessageHelper.java
+    │   │       ├── consts
+    │   │       │   ├── Headers.java
+    │   │       │   └── WebMethods.java
+    │   │       ├── packer
+    │   │       │   ├── MessagePacker.java
+    │   │       │   └── encode
+    │   │       │       ├── ContentGzipStrategy.java
+    │   │       │       ├── EncodeStrategy.java
+    │   │       │       ├── SourceStrategy.java
+    │   │       │       ├── TransChunkedStrategy.java
+    │   │       │       └── TransContentLengthStrategy.java
+    │   │       └── parser
+    │   │           ├── CustomizedReader.java
+    │   │           ├── MessageParser.java
+    │   │           ├── contentdecode
+    │   │           │   ├── ContentDecodeStrategy.java
+    │   │           │   └── GzipStrategy.java
+    │   │           └── transdecode
+    │   │               ├── ChunkedStrategy.java
+    │   │               ├── ContentLengthStrategy.java
+    │   │               └── TransDecodeStrategy.java
+    │   └── resources
+    │       ├── default_status_text.json
+    │       ├── global_headers.json
+    │       ├── mime.json
+    │       └── target_path.json
+    └── test
+        └── java
+            ├── CustomTests.java
+            ├── PackerAndParserTest.java
+            ├── clienttests
+            │   ├── RequestTest.java
+            │   ├── StatusHandlerTest.java
+            │   └── WANTest.java
+            ├── loginsystemtests
+            │   └── LoginSystemTests.java
+            ├── servertests
+            │   ├── LongConnectionTest.java
+            │   ├── MIMETest.java
+            │   ├── ServerTests.java
+            │   └── TargetHandlerTest.java
+            └── util
+                └── Util.java
 ```
 
 

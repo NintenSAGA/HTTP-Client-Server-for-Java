@@ -1,23 +1,16 @@
 package clienttests;
 
 import client.HttpClient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import server.HttpServer;
-import util.Log;
+import util.Util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintStream;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -56,6 +49,20 @@ public class RequestTest {
                 .get("/moved", null);
         String body = hrm.getBodyAsString();
         assertEquals("You got the place!!!", body);
+    }
+
+    @Test
+    @DisplayName("304 Cache Test")
+    public void cacheTest() throws IOException, InterruptedException {
+        HttpClient client = new HttpClient();
+        client.get("/OS/2022/", null);
+
+        client = new HttpClient();
+        var hrm = client.get("/OS/2022/", null);
+
+        assert "304".equals(hrm.getStartLineAndHeaders().split(" ")[1]);
+
+        Util.testAndCompareWebPage("127.0.0.1", 8080, "/OS/2022/");
     }
 
 

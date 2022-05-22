@@ -286,17 +286,6 @@ public abstract class HttpMessage {
         return null;
     }
 
-//    public static String getCacheLastModified(String cacheDir, String file, String type) {
-//        Path fPath = getCachePath(cacheDir, file, type);
-//
-//        try {
-//            FileTime ft = Files.getLastModifiedTime(fPath);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return  "";
-//        }
-//    }
-
     public void storeBodyInCache(String cacheDir, String file, String type) {
         Path fPath = getCachePath(cacheDir, file, type);
 
@@ -322,6 +311,10 @@ public abstract class HttpMessage {
     public void loadBodyFromCache(String cacheDir, String file) {
         Path fPath = getCache(cacheDir, file);
         setBodyAsFileWithAbsPath(fPath);
+    }
+
+    public void dumpMessage() {
+
     }
 
     // ====================== Protected ========================= //

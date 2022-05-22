@@ -195,4 +195,17 @@ public class HttpClient {
             hrm.addHeader(Headers.IF_MODIFIED_SINCE, time);
         }
     }
+
+    public static String present(HttpResponseMessage hrm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("// ==================== Start Line and Headers ==================== //\n");
+        sb.append(hrm.getStartLineAndHeaders());
+        var ct = hrm.getHeaderVal(Headers.CONTENT_TYPE).trim();
+        if (ct.startsWith("text") || ct.endsWith("UTF-8")) {
+            sb.append("// ==================== Body ==================== //\n");
+            sb.append(hrm.getBodyAsString());
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
 }
