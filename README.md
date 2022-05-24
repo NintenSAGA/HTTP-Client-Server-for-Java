@@ -219,10 +219,10 @@ HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.A
 #### 3.1.1.2 支持以下状态码：
 
 - 200 OK<br/>
-  <img src="./docs/image/feature_status_200.png" alt="200" width="300">
+<img src="./docs/image/feature_status_200.png" alt="200" width="300">
   
 - 301 Moved Permanently<br/>
-  <img src="./docs/image/feature_status_301.png" alt="301" width="300">
+<img src="./docs/image/feature_status_301.png" alt="301" width="300">
 
 - 302 Found<br/>
 <img src="./docs/image/feature_status_302.png" alt="302" width="300">
@@ -257,7 +257,7 @@ HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.A
 <img src="./docs/image/feature_mime_html.png" alt="HTML" width="500">
 
 - png: `image/png`<br/>
-  <img src="./docs/image/feature_mime_png.png" alt="PNG" width="500">
+<img src="./docs/image/feature_mime_png.png" alt="PNG" width="500">
   
 - mp4: `video/mp4`<br/>
 <img src="./docs/image/feature_mime_mp4.png" alt="MP4" width="500">
