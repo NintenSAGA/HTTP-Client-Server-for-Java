@@ -47,11 +47,11 @@ Data
 
 ### 2.2 HttpServer
 
-#### 执行指令
+#### 2.2.1 执行指令
 
  `java -jar /path/to/HttpServer.jar [OPTIONS]...` 
 
-#### 具体语法
+#### 2.2.2 具体语法
 
 ```
 SYNOPSIS
@@ -68,7 +68,7 @@ OPTIONS
                     The default value is 10000
 ```
 
-#### 启动信息
+#### 2.2.3 启动信息
 
 若运行正常，则会显示启动信息，包含：
 - Server 运行日志
@@ -93,11 +93,11 @@ SERVER: The server is now running
 
 ### 2.3 HttpClient
 
-#### 执行指令
+#### 2.3.1 执行指令
 
  `java -jar /path/to/HttpClient.jar <URL> [OPTIONS]...` 
 
-#### 具体语法
+#### 2.3.2 具体语法
 
 ```
 SYNOPSIS
@@ -126,7 +126,7 @@ OPTIONS
                     e.g.: User-Agent:AbaAba/0.1
 ```
 
-#### 执行信息
+#### 2.3.3 执行信息
 
 若执行正常，则会显示 
 - Client 执行日志
@@ -143,6 +143,8 @@ OPTIONS
 如下所示：
 
 ```
+/* 直接显示 Body 内容 */
+
 CLIENT: Client has connect to the host
 SOCKET[localhost127.0.0.1:8080]: Message sent 0.097656 KB 
 
@@ -167,9 +169,11 @@ CLIENT: Request complete
 << 
 << You got the place!!!
 ```
-*直接显示 Body 内容*
+
 
 ```
+/* 显示 Body 存储路径 */
+
 >> ==================== HTTP Request Message ==================== <<
 >> GET /OS/2022/ HTTP/1.1
 >> Accept: */*
@@ -194,4 +198,3 @@ CLIENT: Request complete
 << Body saved at: 
 << file:///.../Data/Client/Cache/jyywiki.cn/OS/2022/index/cache.html
 ```
-*显示 Body 存储路径*
