@@ -11,8 +11,8 @@
 - [x] 程序运行方式
 - [x] 功能点
   - [x] 说明、运行截图
-- [ ] 关键数据结构、类说明
-  - [ ] 名字与对应功能
+- [x] 关键数据结构、类说明
+  - [x] 名字与对应功能
 
 # 1. 概览
 
@@ -319,4 +319,76 @@ HttpServer 与 HttpClient 均采用 Java NIO.2 模型进行开发，使用了 `j
   - [Target Set](./src/main/java/edu/nju/http/server/target/TargetSet.java)
 
 
-# 4. 源码结构
+# 4. 代码结构
+
+
+```java
+main/
+├── java
+│   └── edu.nju.http
+│        ├── client  /* Client Package */
+│        │   ├── ClientDriver.java      // main 函数入口
+│        │   ├── HttpClient.java        // 程序主轴
+│        │   └── StatusHandler.java     // Status code 处理类
+│        ├── exception  /* Exception Package */
+│        │   ├── InvalidCommandException.java   
+│        │   │   // 用于 CLI，提示指令不合法
+│        │   └── InvalidMessageException.java
+│        │       // 用于 Message Parser，提示解析错误
+│        ├── message /* Message Package */
+│        │   ├── HttpMessage.java           // 抽象类
+│        │   ├── HttpRequestMessage.java    // 继承 HttpMessage
+│        │   ├── HttpResponseMessage.java   // 继承 HttpMessage
+│        │   ├── MessageHelper.java         // 工具类
+│        │   ├── ResponseMessageFactory.java
+│        │   │      // Http Response Message 制造工厂
+│        │   ├── consts /* Constant Package */
+│        │   │   ├── Headers.java       // Header 常量类
+│        │   │   └── WebMethods.java    // Method 常量类
+│        │   ├── packer /* Packer Package */
+│        │   │   ├── MessagePacker.java     
+│        │   │   │   // 包装并发送 Http Message
+│        │   │   └── encode
+│        │   │       │ /* Content-Encoding          */
+│        │   │       │ /* & Transfer-Encoding 策略类 */ 
+│        │   │       ├── ContentGzipEncodeStrategy.java
+│        │   │       ├── EncodeStrategy.java
+│        │   │       ├── SourceEncodeStrategy.java
+│        │   │       ├── TransChunkedEncodeStrategy.java
+│        │   │       └── TransContentLengthEncodeStrategy.java
+│        │   └── parser /* Parser Package */
+│        │       ├── CustomizedReader.java  // 自制字节流读取器
+│        │       ├── MessageParser.java // 解析并接收 Http Message
+│        │       ├── contentdecode  
+│        │       │   │ /* Content-Encoding 策略类 */
+│        │       │   ├── ContentDecodeStrategy.java
+│        │       │   └── ContentGzipDecodeStrategy.java
+│        │       └── transdecode
+│        │           │ /* Transfer-Encoding 策略类 */
+│        │           ├── TransChunkedDecodeStrategy.java
+│        │           ├── TransContentLengthDecodeStrategy.java
+│        │           └── TransDecodeStrategy.java
+│        ├── server /* Server Package */
+│        │   ├── HttpServer.java    // 程序主循环
+│        │   ├── ServerDriver.java  // main 函数入口
+│        │   ├── TargetHandler.java // Target 处理类
+│        │   └── target /* Target Package     */
+│        │       │     /*  包含各 Mapping 方法 */
+│        │       ├──TargetSet.java   
+│        │       │  // 抽象类，其他类应继承此类
+│        │       ├── Common.java
+│        │       ├── Html.java
+│        │       ├── LoginSystem.java
+│        │       └── Mapping.java
+│        └── util /* Utility Package */
+│            ├── ArgIterator.java   // 参数遍历器，用于 CLI
+│            ├── Config.java        // 包含各参数信息
+│            └── Log.java           // 调试方法类
+└── resources
+    ├── default_status_text.json    // 默认 Status Code 对应文字
+    ├── global_headers.json         // 默认 Server Headers
+    ├── mime.json           // Suffix -> Content-Type 映射
+    └── target_path.json    // Target 类注册表 
+                            //（ 用于在 Target Handler 初始化时用 
+                            //   Reflection 自动装配 ）
+```
