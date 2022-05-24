@@ -1,11 +1,11 @@
 package clienttests;
 
-import client.HttpClient;
+import edu.nju.http.client.HttpClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import server.HttpServer;
+import edu.nju.http.server.HttpServer;
 import util.Util;
 
 import java.io.BufferedReader;

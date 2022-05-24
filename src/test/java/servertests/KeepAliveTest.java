@@ -3,7 +3,7 @@ package servertests;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import server.HttpServer;
+import edu.nju.http.server.HttpServer;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;

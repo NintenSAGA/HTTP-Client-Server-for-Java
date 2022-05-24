@@ -1,6 +1,7 @@
 package util;
 
-import client.HttpClient;
+import edu.nju.http.client.HttpClient;
+import edu.nju.http.util.Config;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.File;

@@ -1,12 +1,12 @@
-import exception.InvalidMessageException;
+import edu.nju.http.exception.InvalidMessageException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import message.HttpResponseMessage;
-import server.ResponseMessageFactory;
-import util.Config;
-import message.packer.MessagePacker;
-import message.parser.MessageParser;
+import edu.nju.http.message.HttpResponseMessage;
+import edu.nju.http.message.ResponseMessageFactory;
+import edu.nju.http.util.Config;
+import edu.nju.http.message.packer.MessagePacker;
+import edu.nju.http.message.parser.MessageParser;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static message.consts.Headers.CHUNKED;
+import static edu.nju.http.message.consts.Headers.CHUNKED;
 
 /**
  * Test cases for Request Message Parser and Response Message Parser<br/>

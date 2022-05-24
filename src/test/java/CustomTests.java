@@ -1,31 +1,11 @@
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import util.Config;
-import util.Log;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousServerSocketChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.concurrent.ExecutionException;
+import edu.nju.http.util.Log;
 
 public class CustomTests {
 
-    @Test   
+    @Test
+    @Disabled
     public void sample() {
         Log.debug("Premature optimization is the root of all evil ——D. E. Knuth");
         Log.debug("虽然不太愿意承认，但始终假设自己的代码是错的。");

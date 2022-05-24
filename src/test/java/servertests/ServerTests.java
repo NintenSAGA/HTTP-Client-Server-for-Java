@@ -1,12 +1,9 @@
 package servertests;
 
-import lombok.Builder;
 import org.junit.jupiter.api.Test;
-import server.HttpServer;
+import edu.nju.http.server.HttpServer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.Thread.sleep;

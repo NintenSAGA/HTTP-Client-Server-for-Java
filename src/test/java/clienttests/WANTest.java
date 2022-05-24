@@ -1,8 +1,8 @@
 package clienttests;
 
 import org.junit.jupiter.api.Test;
-import util.Config;
-import message.HttpMessage;
+import edu.nju.http.util.Config;
+import edu.nju.http.message.HttpMessage;
 
 import java.io.IOException;
 
