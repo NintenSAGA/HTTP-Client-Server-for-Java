@@ -5,6 +5,14 @@
 
 由 Java Socket API 实现的简单 HTTP Client 与 Http Server
 
+# 0. 开发
+
+开发日志: [DevLog.md](./docs/DevLog.md)
+
+测试用数据集: [Data.zip](./docs/Data.zip)
+
+
+
 # 1. 概览
 
 ## 1.1 环境
