@@ -6,6 +6,9 @@ import edu.nju.http.util.Config;
 import edu.nju.http.util.Log;
 import edu.nju.http.message.consts.WebMethods;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+
 public class Common extends TargetSet {
     @Mapping(value = Config.MISSING, method = {WebMethods.GET, WebMethods.POST})
     public static HttpResponseMessage responseOnMis(HttpRequestMessage msg) {
@@ -25,5 +28,15 @@ public class Common extends TargetSet {
     @Mapping(value = "/moved", method = WebMethods.GET)
     public static HttpResponseMessage moved(HttpRequestMessage msg) {
         return factory.produce(301, "/test");
+    }
+
+    @Mapping(value = "/found", method = WebMethods.GET)
+    public static HttpResponseMessage found(HttpRequestMessage msg) {
+        return factory.produce(302, "/found");
+    }
+
+    @Mapping(value = "/panic", method = WebMethods.GET)
+    public static HttpResponseMessage panic(HttpRequestMessage msg) throws IOException {
+        throw new IOException();
     }
 }

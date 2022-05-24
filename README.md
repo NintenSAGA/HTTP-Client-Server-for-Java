@@ -210,14 +210,62 @@ HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.A
 
 ### 3.1.1 接收
 
-- 支持 `GET` 和 `POST` 请求
-
-<img src="./docs/image/feature_get.png" alt="GET" width="250"> <img src="./docs/image/feature_post.png" alt="POST" width="250">
-
-相关测试: [LoginSystemTests](./src/test/java/loginsystemtests/LoginSystemTests.java)
+- 支持 `GET` 和 `POST` 请求，相关测试: [LoginSystemTests](./src/test/java/loginsystemtests/LoginSystemTests.java)
+  
+<img src="./docs/image/feature_get.png" alt="GET" width="300"> <img src="./docs/image/feature_post.png" alt="POST" width="300">
 
 - 支持以下状态码：
-  - 200 OK
-  - 
+  - 200 OK<br/>
+  <img src="./docs/image/feature_status_200.png" alt="200" width="300">
+  
+  - 301 Moved Permanently<br/>
+  <img src="./docs/image/feature_status_301.png" alt="301" width="300">
+
+  - 302 Found<br/>
+  <img src="./docs/image/feature_status_302.png" alt="302" width="300">
+
+  - 304 Not Modified<br/>
+  <img src="./docs/image/feature_status_304.png" alt="304" width="300">
+
+  - 404 Not Found<br/>
+  <img src="./docs/image/feature_status_404.png" alt="404" width="300">
+
+  - 405 Method Not Allowed<br/>
+  <img src="./docs/image/feature_status_405.png" alt="405" width="300">
+
+  - 500 Internal Server Error<br/>
+  <img src="./docs/image/feature_status_500.png" alt="500" width="300">
+
+  - 505 HTTP Version Not Supported<br/>
+  <img src="./docs/image/feature_status_505.png" alt="505" width="300">
+
+- 支持长连接 (Keep-Alive) ，相关测试：[KeepAliveTest](./src/test/java/servertests/KeepAliveTest.java)<br/>
+  <img src="./docs/image/feature_keep_alive.png" alt="Keep-Alive">
+
+- 支持MIME类型： <br/> 已测试过的全部类型: [mime.json](./src/main/resources/mime.json)<br/>理论支持任意文件传输
+  - HTML: `text/html`<br/>
+<img src="./docs/image/feature_mime_html.png" alt="HTML" width="500">
+
+  - png: `image/png`<br/>
+<img src="./docs/image/feature_mime_png.png" alt="PNG" width="500">
+  
+  - mp4: `video/mp4`<br/>
+<img src="./docs/image/feature_mime_mp4.png" alt="MP4" width="500">
+
+  - svg: `image/svg+xml`<br/>
+<img src="./docs/image/feature_mime_svg.png" alt="SVG" width="500">
+
+- 编写了注册、登录、状态保持系统
+  
+    1. 用户注册<br/>
+<img src="./docs/image/feature_loginsys_1.png" alt="loginsys_1" width="500">
+    2. 检查登录状态<br/>
+<img src="./docs/image/feature_loginsys_2.png" alt="loginsys_2" width="500">
+    3. 登出<br/>
+<img src="./docs/image/feature_loginsys_3.png" alt="loginsys_3" width="500">
+    4. 检查登录状态<br/>
+<img src="./docs/image/feature_loginsys_4.png" alt="loginsys_4" width="500">
+    5. 登录<br/>
+<img src="./docs/image/feature_loginsys_5.png" alt="loginsys_5" width="500">
 
 ## 3.2 HttpClient

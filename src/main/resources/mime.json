@@ -20,14 +20,13 @@
       "jpeg"    : "jpeg",
       "jpg"     : "jpeg",
       "png"     : "png",
-      "gif"     : "gif",
-      "svg"     : "svg+xml"
+      "gif"     : "gif"
     },
 
     "video": {
       "avi"     : "x-msvideo",
       "mp4"     : "mp4",
-      "mpeg"     : "mpeg"
+      "mpeg"    : "mpeg"
     }
   }
 }

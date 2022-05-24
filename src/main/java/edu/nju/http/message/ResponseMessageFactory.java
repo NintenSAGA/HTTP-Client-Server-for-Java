@@ -105,7 +105,7 @@ public class ResponseMessageFactory {
      */
     private HttpResponseMessage produce302(String[] args) {
         if (args.length < 1) return produce500();
-        HttpResponseMessage hrm = new HttpResponseMessage(301);
+        HttpResponseMessage hrm = new HttpResponseMessage(302);
         hrm.addHeader("Location", args[0]);
         return hrm;
     }

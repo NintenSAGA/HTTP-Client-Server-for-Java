@@ -33,7 +33,7 @@ public class LoginSystemTests {
     @DisplayName("Register Test")
     public void register() throws IOException, InterruptedException {
         var pb = new ProcessBuilder();
-        pb.command("curl", "-v", "--request", "POST",  "http://127.0.0.1:8080/register",
+    pb.command("curl", "-v", "--request", "POST",  "http://127.0.0.1:8080/register",
                     "--header", "Content-Type: application/x-www-form-urlencoded",
                     "--data-urlencode", "name=%s&password=%s".formatted(NAME, PASS));
         var p = pb.start();

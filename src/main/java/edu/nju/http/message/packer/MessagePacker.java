@@ -113,26 +113,29 @@ public class MessagePacker {
 
         // Config.GZIP_MAXSIZE < Config.CONTENT_LENGTH_THRESHOLD;
 
-        // -------------------- 1. Content Encoding -------------------- //
-        /*  Only support gzip.                                              */
-        /*  Only used when the size is smaller than Config.GZIP_MAXSIZE     */
-        /*  to avoid memory overload.                                       */
-        if (acceptEncoding.contains(GZIP) && length <= Config.GZIP_MAXSIZE) {
-            Log.debug("Content encoded with gzip");
-            EncodeStrategy gzipStrategy = new ContentGzipEncodeStrategy();
-            upperStrategy = gzipStrategy.connect(message.getHeaders(), upperStrategy);
-        }
+        if (length != 0) {
+            // -------------------- 1. Content Encoding -------------------- //
+            /*  Only support gzip.                                              */
+            /*  Only used when the size is smaller than Config.GZIP_MAXSIZE     */
+            /*  to avoid memory overload.                                       */
+            if (acceptEncoding.contains(GZIP) && length <= Config.GZIP_MAXSIZE) {
+                Log.debug("Content encoded with gzip");
+                EncodeStrategy gzipStrategy = new ContentGzipEncodeStrategy();
+                upperStrategy = gzipStrategy.connect(message.getHeaders(), upperStrategy);
+            }
 
 
-        if (transferEncodings != null && length < Config.CONTENT_LENGTH_THRESHOLD) {
-            // -------------------- 2. Transfer Encoding -------------------- //
-            /* Now only support chunked encoding.                               */
-            /* Using chunked encoding only when the size is smaller than        */
-            /* Config.CONTENT_LENGTH_THRESHOLD.                                 */
-            for (String te : transferEncodings) {
-                if (!strategyMap.containsKey(te))
-                    Log.panic("Unsupported transfer-encoding[%s]!".formatted(te));
-                upperStrategy = strategyMap.get(te).connect(message.getHeaders(), upperStrategy);
+            if (    transferEncodings != null
+                    && length < Config.CONTENT_LENGTH_THRESHOLD) {
+                // -------------------- 2. Transfer Encoding -------------------- //
+                /* Now only support chunked encoding.                               */
+                /* Using chunked encoding only when the size is smaller than        */
+                /* Config.CONTENT_LENGTH_THRESHOLD.                                 */
+                for (String te : transferEncodings) {
+                    if (!strategyMap.containsKey(te))
+                        Log.panic("Unsupported transfer-encoding[%s]!".formatted(te));
+                    upperStrategy = strategyMap.get(te).connect(message.getHeaders(), upperStrategy);
+                }
             }
         }
 
