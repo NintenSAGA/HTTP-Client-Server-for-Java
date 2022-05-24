@@ -323,7 +323,7 @@ HttpServer 与 HttpClient 均采用 Java NIO.2 模型进行开发，使用了 `j
 
 
 ```java
-main/
+main
 ├── java
 │   └── edu.nju.http
 │        ├── client  /* Client Package */
