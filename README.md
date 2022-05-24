@@ -5,15 +5,6 @@
 
 由 Java Socket API 实现的简单 HTTP Client 与 Http Server
 
-## TODO
-
-- [x] 语言
-- [x] 程序运行方式
-- [x] 功能点
-  - [x] 说明、运行截图
-- [x] 关键数据结构、类说明
-  - [x] 名字与对应功能
-
 # 1. 概览
 
 ## 1.1 环境
