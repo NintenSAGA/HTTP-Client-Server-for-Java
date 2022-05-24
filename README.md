@@ -212,8 +212,7 @@ HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.A
 
 - 支持 `GET` 和 `POST` 请求
 
-<img src="./docs/image/feature_get.png" alt="GET" width="250">
-<img src="./docs/image/feature_post.png" alt="POST" width="250">
+<img src="./docs/image/feature_get.png" alt="GET" width="250"> <img src="./docs/image/feature_post.png" alt="POST" width="250">
 
 相关测试: [LoginSystemTests](./src/test/java/loginsystemtests/LoginSystemTests.java)
 
