@@ -5,22 +5,22 @@
 
 由 Java Socket API 实现的简单 HTTP Client 与 Http Server
 
-### TODO
+## TODO
 
-- [ ] 语言
-- [ ] 程序运行方式
+- [x] 语言
+- [x] 程序运行方式
 - [ ] 功能点
   - [ ] 说明、运行截图
 - [ ] 关键数据结构、类说明
   - [ ] 名字与对应功能
 
-## 1. 概览
+# 1. 概览
 
-### 1.1 环境
+## 1.1 环境
 
 本项目基于 JDK 17.0 编写，由 Maven 构造。
 
-### 1.2 依赖
+## 1.2 依赖
 
 | Scope | GroupId             | ArtifactId             | Version    |
 | ----- | ------------------- | ---------------------- | ---------- |
@@ -28,49 +28,52 @@
 | Build | `org.json`          | `json`                 | `20220320` |
 | Test  | `org.junit.jupiter` | `junit-jupiter-engine` | `5.8.2`    |
 
-### 1.3 运行方式
+## 1.3 运行方式
 
-最终产品为jar文件，通过 `java -jar [NAME].jar` 运行。
+最终产品为 jar 文件，通过 `java -jar [NAME].jar` 运行。
 
-## 2. 使用说明
-### 2.1 外部文件
+# 2. 使用
+
+## 2.1 外部文件
+
 [Data](./Data/) 及其子目录会在 HttpClient 或 HttpServer 启动时被自动创建于 jar 文件所在目录，结构如下：
 
 ```
-Data            
+Data
 ├── Client
 │   └── Cache   // Client的缓存目录
-└── Server    
+└── Server
     ├── Cache   // Server的缓存目录（未使用）
     └── Static  // Server的静态文件存放目录
 ```
 
-### 2.2 HttpServer
+## 2.2 HttpServer
 
-#### 2.2.1 执行指令
+## 2.2.1 执行指令
 
- `java -jar /path/to/HttpServer.jar [OPTIONS]...` 
+`java -jar /path/to/HttpServer.jar [OPTIONS]...`
 
-#### 2.2.2 具体语法
+## 2.2.2 具体语法
 
 ```
 SYNOPSIS
     ~   [-p <PORT>] [--keep-alive]
         [-t <TIMEOUT>]
-        
+
 OPTIONS
     -p <PORT>       Set up the server with the specified port number.
                     The default value is 8080
-                    
+
     --keep-alive    Enable keep-alive.
-    
+
     -t <TIMEOUT>    Socket timeout.
                     The default value is 10000
 ```
 
-#### 2.2.3 启动信息
+## 2.2.3 启动信息
 
 若运行正常，则会显示启动信息，包含：
+
 - Server 运行日志
 - 预设 URL Mapping 信息
 - 静态文件读取目录
@@ -90,50 +93,51 @@ SERVER: Reading static files from: [file:///.../Data/Server/Static]
 SERVER: The server is now running
 ```
 
+## 2.3 HttpClient
 
-### 2.3 HttpClient
+## 2.3.1 执行指令
 
-#### 2.3.1 执行指令
+`java -jar /path/to/HttpClient.jar <URL> [OPTIONS]...`
 
- `java -jar /path/to/HttpClient.jar <URL> [OPTIONS]...` 
-
-#### 2.3.2 具体语法
+## 2.3.2 具体语法
 
 ```
 SYNOPSIS
     ~   <URL>
         [-m <METHOD>] [--keep-alive] [-b <text>]
         [-h <headers>...]
-        
+
 URL
     Using the generic URI syntax of:
     http://<HOSTNAME>[:PORT][/PATH][?QUERY]
 
     The default value of the port number is 80.
     Only support HTTP protocol (not HTTPS).
-    
+
 OPTIONS
     -m <METHOD>     Send with the specified web method.
                     Only supports GET and POST.
                     The default value is GET.
-                    
+
     --keep-alive    Enable keep-alive.ß
-    
+
     -b <text>       Plain text body.
-    
+
     -h <header>...  Send with the specified headers.
                     Syntax: <key>:<value>
                     e.g.: User-Agent:AbaAba/0.1
 ```
 
-#### 2.3.3 执行信息
+## 2.3.3 执行信息
 
-若执行正常，则会显示 
+若执行正常，则会显示
+
 - Client 执行日志
 - HTTP Request Message 原信息
 - HTTP Response Message 原信息
 
 其中原信息包含：
+
 - Startline
 - Headers
 - Body
@@ -146,7 +150,7 @@ OPTIONS
 /* 直接显示 Body 内容 */
 
 CLIENT: Client has connect to the host
-SOCKET[localhost127.0.0.1:8080]: Message sent 0.097656 KB 
+SOCKET[localhost127.0.0.1:8080]: Message sent 0.097656 KB
 
 >> ==================== HTTP Request Message ==================== <<
 >> GET /test HTTP/1.1
@@ -154,7 +158,7 @@ SOCKET[localhost127.0.0.1:8080]: Message sent 0.097656 KB
 >> User-Agent: Wget/1.21.3
 >> Host: localhost
 >> Accept-Encoding: gzip
->> 
+>>
 CLIENT: Status code received: 200
 CLIENT: Handle returned directly...
 CLIENT: Request complete
@@ -166,10 +170,9 @@ CLIENT: Request complete
 << content-encoding: gzip
 << connection: keep-alive
 << content-type: text/plain; charset=UTF-8
-<< 
+<<
 << You got the place!!!
 ```
-
 
 ```
 /* 显示 Body 存储路径 */
@@ -181,7 +184,7 @@ CLIENT: Request complete
 >> If-Modified-Since: Sun, 22 May 2022 11:13:51 GMT
 >> Host: jyywiki.cn
 >> Accept-Encoding: gzip
->> 
+>>
 CLIENT: Status code received: 200
 CLIENT: Handle returned directly...
 CLIENT: Request complete
@@ -194,7 +197,28 @@ CLIENT: Request complete
 << content-type: text/html; charset=utf-8
 << connection: keep-alive
 << Content-Length: 16876
-<< 
-<< Body saved at: 
+<<
+<< Body saved at:
 << file:///.../Data/Client/Cache/jyywiki.cn/OS/2022/index/cache.html
 ```
+
+# 3. 功能
+
+## 3.1 HttpServer
+
+HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.AsynchronousServerSocketChannel`、`java.nio.channels.AsynchronousSocketChannel` 等类。
+
+### 3.1.1 接收
+
+- 支持 `GET` 和 `POST` 请求
+
+<img src="./docs/image/feature_get.png" alt="GET" width="250">
+<img src="./docs/image/feature_post.png" alt="POST" width="250">
+
+相关测试: [LoginSystemTests](./src/test/java/loginsystemtests/LoginSystemTests.java)
+
+- 支持以下状态码：
+  - 200 OK
+  - 
+
+## 3.2 HttpClient
