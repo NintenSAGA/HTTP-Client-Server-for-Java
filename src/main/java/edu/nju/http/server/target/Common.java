@@ -32,7 +32,7 @@ public class Common extends TargetSet {
 
     @Mapping(value = "/found", method = WebMethods.GET)
     public static HttpResponseMessage found(HttpRequestMessage msg) {
-        return factory.produce(302, "/found");
+        return factory.produce(302, "/test");
     }
 
     @Mapping(value = "/panic", method = WebMethods.GET)

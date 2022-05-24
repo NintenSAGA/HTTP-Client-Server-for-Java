@@ -9,8 +9,8 @@
 
 - [x] 语言
 - [x] 程序运行方式
-- [ ] 功能点
-  - [ ] 说明、运行截图
+- [x] 功能点
+  - [x] 说明、运行截图
 - [ ] 关键数据结构、类说明
   - [ ] 名字与对应功能
 
@@ -204,19 +204,18 @@ CLIENT: Request complete
 
 # 3. 功能
 
+HttpServer 与 HttpClient 均采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.AsynchronousServerSocketChannel`、`java.nio.channels.AsynchronousSocketChannel` 等类。
+
 ## 3.1 HttpServer
 
-HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.AsynchronousServerSocketChannel`、`java.nio.channels.AsynchronousSocketChannel` 等类。
 
-### 3.1.1 接收
-
-#### 3.1.1.1 支持 `GET` 和 `POST` 请求
+### 3.1.1 支持 `GET` 和 `POST` 请求
 
 相关测试: [LoginSystemTests](./src/test/java/loginsystemtests/LoginSystemTests.java)
 
 <img src="./docs/image/feature_get.png" alt="GET" width="300"> <img src="./docs/image/feature_post.png" alt="POST" width="300">
 
-#### 3.1.1.2 支持以下状态码：
+### 3.1.2 支持以下状态码：
 
 - 200 OK<br/>
 <img src="./docs/image/feature_status_200.png" alt="200" width="300">
@@ -242,12 +241,12 @@ HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.A
 - 505 HTTP Version Not Supported<br/>
 <img src="./docs/image/feature_status_505.png" alt="505" width="300">
 
-#### 3.1.1.3 支持长连接 (Keep-Alive) 
+### 3.1.3 支持长连接 (Keep-Alive) 
 
 相关测试：[KeepAliveTest](./src/test/java/servertests/KeepAliveTest.java)
 
 <img src="./docs/image/feature_keep_alive.png" alt="Keep-Alive">
-#### 3.1.1.4 支持MIME类型：
+### 3.1.4 支持MIME类型：
 
 已测试过的全部类型: [mime.json](./src/main/resources/mime.json)
 
@@ -265,7 +264,7 @@ HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.A
 - svg: `image/svg+xml`<br/>
 <img src="./docs/image/feature_mime_svg.png" alt="SVG" width="500">
 
-#### 3.1.1.5 支持注册、登录、状态保持系统
+### 3.1.5 支持注册、登录、状态保持系统
 
 相关测试: [LoginSystemTests](./src/test/java/loginsystemtests/LoginSystemTests.java)
 
@@ -285,3 +284,39 @@ HttpServer 采用 Java NIO.2 模型进行开发，使用了 `java.nio.channels.A
 <img src="./docs/image/feature_loginsys_5.png" alt="loginsys_5" width="500">
 
 ## 3.2 HttpClient
+
+### 3.2.1 在CLI界面显示 Http Request&Response Message
+
+相关测试：[WANTest](./src/test/java/clienttests/WANTest.java)
+
+<img src="./docs/image/feature_client_cli.png" alt="client_cli">
+
+### 3.2.2 对 Status code 301, 302, 304 的处理
+
+相关测试：[RequestTest](./src/test/java/clienttests/RequestTest.java)
+
+1. 301 Moved<br/>
+<img src="./docs/image/feature_client_301.png" alt="301">
+
+2. 302 Found<br/>
+<img src="./docs/image/feature_client_302.png" alt="302">
+
+3. 304 Not Modified<br/>
+<img src="./docs/image/feature_client_304.png" alt="304">
+
+
+### 3.3 其他
+
+- 仅支持 HTTP/1.1
+- 收/发支持的 Content-Encoding: gzip
+- 收/发支持的 Transfer-Encoding: default(Content-Length), chunked
+- HttpServer 可以自动根据负载大小调整选用的 Content-Encoding 与 Transfer-Encoding
+  - [MessagePacker.java](./src/main/java/edu/nju/http/message/packer/MessagePacker.java)
+- HttpServer 可以用类似 SpringBoot 的方式编写 URL Mapping
+  - [Target Handler](./src/main/java/edu/nju/http/server/TargetHandler.java)
+  - [Mapping Annotation](./src/main/java/edu/nju/http/server/target/Mapping.java)
+  - [target_path.json](./src/main/resources/target_path.json)
+  - [Target Set](./src/main/java/edu/nju/http/server/target/TargetSet.java)
+
+
+# 4. 源码结构
