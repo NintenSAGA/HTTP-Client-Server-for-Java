@@ -243,6 +243,7 @@ HttpServer 与 HttpClient 均采用 Java NIO.2 模型进行开发，使用了 `j
 相关测试：[KeepAliveTest](./src/test/java/servertests/KeepAliveTest.java)
 
 <img src="./docs/image/feature_keep_alive.png" alt="Keep-Alive">
+
 ### 3.1.4 支持MIME类型：
 
 已测试过的全部类型: [mime.json](./src/main/resources/mime.json)
