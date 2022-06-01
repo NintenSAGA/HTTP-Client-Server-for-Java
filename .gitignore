@@ -33,17 +33,16 @@ hs_err_pid*
 /target/
 /temp/*
 
-src/main/resources/client_cache/*
-src/main/resources/server_cache/*
-src/main/resources/test_cache/*
-
 *.js
 *.css
 css
 *.dmg
-/src/main/resources/static/M3_files/
 
 /Data/Server/*
 /Data/Client/*
-/Data/Test/*
+/Data/Test/Cache/*
 /out/
+
+!/Data/Test/Cache/f5e11a898bd7f7b3410c3e4aa54ef62928127e09/
+
+
