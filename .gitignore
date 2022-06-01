@@ -38,8 +38,9 @@ hs_err_pid*
 css
 *.dmg
 
-/Data/Server/*
-/Data/Client/*
+/Data/Server/Cache/*
+/Data/Server/Static/*
+/Data/Client/Cache/*
 /Data/Test/Cache/*
 /out/
 
