@@ -135,8 +135,10 @@ public class HttpServer {
     }
 
     /**
-     * Should be packed in a Thread <br/>
-     * Socket handler --> TargetHandler --> Output handler <br/>
+     * Socket handler
+     * --> Message Parser
+     * --> TargetHandler
+     * --> Message Packer <br/>
      */
     private void handleSocket(AsynchronousSocketChannel socket, boolean keepAlive, int timeOut) {
         Log.logSocket(socket, "Accepted");

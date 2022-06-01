@@ -107,6 +107,14 @@ public class HttpClient {
         return request(WebMethods.POST, rawUri, body, headers);
     }
 
+    /**
+     * Perform HTTP request
+     * @param method HTTP method. Supports GET and POST
+     * @param rawUri Raw URI string
+     * @param body Message body
+     * @param headers Message Headers
+     * @return Received response
+     */
     HttpResponseMessage request(String method, String rawUri, String body, String ... headers) throws IOException {
         assert WebMethods.GET.equals(method) || WebMethods.POST.equals(method);
         assert rawUri != null;
@@ -162,7 +170,7 @@ public class HttpClient {
                 connected = true;
             }
 
-            // -------------------- Header editing -------------------- //
+            // -------------------- 1. Header editing -------------------- //
             request.addHeader("Host", hostName);
             request.addHeader(Headers.USER_AGENT, "Wget/1.21.3");
             request.addHeader(Headers.ACCEPT_ENCODING, "gzip");
@@ -170,26 +178,26 @@ public class HttpClient {
 
             if (keepAlive) request.addHeader(Headers.CONNECTION, Headers.KEEP_ALIVE);
 
-            // -------------------- Cache checking -------------------- //
+            // -------------------- 2. Cache checking -------------------- //
             checkCache(request);
 
-            // -------------------- Pack and send -------------------- //
+            // -------------------- 3. Pack and send -------------------- //
             MessagePacker packer = new MessagePacker(request, null);
             packer.send(aSocket);
 
             /*               Output 1               */
             System.out.println(present(request));
 
-            // -------------------- Receive and parse -------------------- //
+            // -------------------- 4. Receive and parse -------------------- //
             MessageParser parser = new MessageParser(aSocket, 10000);
             HttpResponseMessage hrm = parser.parseToHttpResponseMessage();
 
-            // -------------------- Status Handler -------------------- //
+            // -------------------- 5. Status Handler -------------------- //
             hrm = handler.handle(this, hrm);
 
             Log.logClient("Request complete");
 
-            // -------------------- Caching -------------------- //
+            // -------------------- 6. Caching -------------------- //
             String content_type = hrm.getHeaderVal(Headers.CONTENT_TYPE);
             if (    hrm.getStatusCode() != 304
                     && content_type != null
@@ -224,7 +232,7 @@ public class HttpClient {
         }
     }
 
-    public String present(HttpMessage hrm) {
+    private String present(HttpMessage hrm) {
         StringBuilder sb = new StringBuilder();
         sb.append(hrm.getStartLineAndHeaders());
         var ct = hrm.getHeaderVal(Headers.CONTENT_TYPE);
@@ -247,17 +255,23 @@ public class HttpClient {
         return sb.toString();
     }
 
-    public String decorate(String s, String mark) {
+    private String decorate(String s, String mark) {
         return Arrays.stream(s.split("\n"))
                 .map(ss -> mark + ss)
                 .collect(Collectors.joining("\n"));
     }
 
+    /**
+     * Present the HTTP Request Message as String
+    */
     public String present(HttpRequestMessage hrm) {
         return "\n>> ==================== HTTP Request Message ==================== <<\n" +
                 decorate(present((HttpMessage) hrm), ">> ");
     }
 
+    /**
+     * Present the HTTP Response Message as String
+    */
     public String present(HttpResponseMessage hrm) {
         return "\n<< ==================== HTTP Response Message ==================== >>\n" +
                 decorate(present((HttpMessage) hrm), "<< ");

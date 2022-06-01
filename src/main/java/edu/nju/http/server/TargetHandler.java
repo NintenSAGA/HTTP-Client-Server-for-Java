@@ -56,11 +56,15 @@ class TargetHandler {
 
         StringBuilder sb = new StringBuilder();
 
+        /* Load preset targets from the config file */
         try {
             for (String prefix : json.keySet()) {
+                /* Package name */
                 for (Object className : json.getJSONArray(prefix).toList()) {
+                    /* Class name */
                     Class<?> targetClass = Class.forName("%s.%s".formatted(prefix, className));
                     for (Method method : targetClass.getDeclaredMethods()) {
+                        /* Mapped methods */
                         if (method.isAnnotationPresent(mappingClass)) {
                             assert checkMethod(method);
                             Mapping mapping = method.getDeclaredAnnotation(mappingClass);
@@ -110,8 +114,6 @@ class TargetHandler {
 
     /**
      * Handling the request based on the method and the target
-     *
-     * @return Response object
      */
     public HttpResponseMessage handle(HttpRequestMessage msg) {
         if (!supportedMethods.contains(msg.getMethod()))
