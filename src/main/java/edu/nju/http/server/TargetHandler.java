@@ -129,10 +129,10 @@ class TargetHandler {
                 // -------------------- 1. Static Resource -------------------- //
                 Path path = getResourcePath(target);
 
-                Log.debug("Search resource in path: ", path);
+                Log.debug("Searching resource in path: ", path);
 
                 if (WebMethods.GET.equals(msg.getMethod())
-                        && Files.exists(path)
+                        && Files.exists(path) && !Files.isDirectory(path)
                 ) {
                     return loadStaticResource(path, msg);
                 } else {

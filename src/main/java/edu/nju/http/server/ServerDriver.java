@@ -7,11 +7,14 @@ import edu.nju.http.util.Config;
 public class ServerDriver {
     public static final String HELP = """
             SYNOPSIS
-                ~   [-p <PORT>] [--keep-alive]
+                ~   [-a <ADDRESS>] [-p <PORT>] [--keep-alive]
                     [-t <TIMEOUT>]
                     
             OPTIONS
-                -p <PORT>       Set up the server with the specified port number.
+                -a <ADDRESS>    Bind the server to the specified IPv4 address.
+                                The default value is 127.0.0.1
+                
+                -p <PORT>       Bind the server to the specified port number.
                                 The default value is 8080
                                 
                 --keep-alive    Enable keep-alive.
@@ -24,6 +27,7 @@ public class ServerDriver {
         try {
             ArgIterator ai = new ArgIterator(args, "-");
 
+            String hostname = "127.0.0.1";
             int port = 8080;
             boolean keepAlive = Config.DEFAULT_KEEP_ALIVE;
             int timeout = Config.DEFAULT_TIMEOUT;
@@ -31,6 +35,7 @@ public class ServerDriver {
             while (ai.hasNext()) {
                 String opt = ai.next();
                 switch (opt) {
+                    case "-a" -> hostname = ai.next();
                     case "-p" -> port = Integer.parseInt(ai.next());
                     case "--keep-alive" -> keepAlive = true;
                     case "-t" -> timeout = Integer.parseInt(ai.next());
@@ -38,7 +43,7 @@ public class ServerDriver {
                 }
             }
 
-            HttpServer server = new HttpServer("127.0.0.1", port);
+            HttpServer server = new HttpServer(hostname, port);
             server.launch(keepAlive, timeout);
 
         } catch (InvalidCommandException e) {

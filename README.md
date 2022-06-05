@@ -54,15 +54,18 @@ Data
 
 ```
 SYNOPSIS
-    ~   [-p <PORT>] [--keep-alive]
+    ~   [-a <ADDRESS>] [-p <PORT>] [--keep-alive]
         [-t <TIMEOUT>]
-
+        
 OPTIONS
-    -p <PORT>       Set up the server with the specified port number.
+    -a <ADDRESS>    Bind the server to the specified IPv4 address.
+                    The default value is 127.0.0.1
+    
+    -p <PORT>       Bind the server to the specified port number.
                     The default value is 8080
-
+                    
     --keep-alive    Enable keep-alive.
-
+    
     -t <TIMEOUT>    Socket timeout.
                     The default value is 10000
 ```
@@ -86,6 +89,7 @@ SERVER: Preset mappings:
 /test, methods: [GET]
 /missing, methods: [GET,POST]
 /moved, methods: [GET]
+SERVER: Server bound to /127.0.0.1:8080
 SERVER: Reading static files from: [file:///.../Data/Server/Static]
 SERVER: The server is now running
 ```

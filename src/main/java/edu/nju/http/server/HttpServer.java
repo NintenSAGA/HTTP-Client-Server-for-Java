@@ -12,11 +12,16 @@ import edu.nju.http.util.Config;
 import edu.nju.http.util.Log;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -45,6 +50,8 @@ public class HttpServer {
         this.handler = TargetHandler.getInstance();
         this.aServerSocket = AsynchronousServerSocketChannel.open();
         this.aServerSocket.bind(new InetSocketAddress(hostName, port));
+        Log.logServer("Server bound to " + this.aServerSocket.getLocalAddress().toString());
+
         this.globalHeaders = new HashMap<>();
 
         this.running = new Semaphore(0);
@@ -167,7 +174,6 @@ public class HttpServer {
                         Log.logSocket(socket, "Keep-Alive disabled for the client");
                         keepAlive = false;
                     }
-
 
                     // -------------------- 2. Handle the request and generate response -------------------- //
                     responseMessage = handler.handle(requestMessage);
