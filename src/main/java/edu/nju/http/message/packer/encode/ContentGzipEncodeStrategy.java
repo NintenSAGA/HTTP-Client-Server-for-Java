@@ -18,7 +18,7 @@ public class ContentGzipEncodeStrategy extends EncodeStrategy {
             try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(
                     outputStream
             )) {
-                byte[] bytes = upper.readBytes();
+                byte[] bytes = upper.readAllBytes();
                 gzipOutputStream.write(bytes, 0, bytes.length);
                 gzipOutputStream.finish();
             }

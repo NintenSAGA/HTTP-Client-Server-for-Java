@@ -33,13 +33,16 @@ public class MessagePacker {
     HttpMessage message;
     private final
     String[]    transferEncodings;
+    private final
+    String acceptEncoding;
+
+    private final
+    ByteBuffer bb;
 
     private
     AsynchronousSocketChannel socket;
     private
     Queue<byte[]> byteArrayQueue;
-    private
-    String acceptEncoding;
 
     // ==================== Constructors ==================== //
 
@@ -62,9 +65,9 @@ public class MessagePacker {
         this.transferEncodings = transferEncodings;
         this.socket = null;
         this.acceptEncoding = Objects.requireNonNullElseGet(acceptEncoding, ()->"");
+        this.bb = ByteBuffer.allocate(Config.SOCKET_BUFFER_SIZE);
 
         strategyMap = new HashMap<>();
-        strategyMap.put( CONTENT_LENGTH,    new TransContentLengthEncodeStrategy() );
         strategyMap.put( CHUNKED,           new TransChunkedEncodeStrategy() );
     }
 
@@ -140,13 +143,12 @@ public class MessagePacker {
         }
 
         // -------------------- 3. Send out start line and headers -------------------- //
-        written += flush(message.getStartLineAndHeadersAsStream());
+        written += flush(
+                new SourceEncodeStrategy(message.getStartLineAndHeadersAsStream())
+        );
 
         // -------------------- 4. Send out -------------------- //
-        for (byte[] bytes; (bytes = upperStrategy.readBytes()).length != 0; ) {
-            ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-            written += flush(stream);
-        }
+        written += flush(upperStrategy);
 
         if (socket != null)
             Log.logSocket(socket,"Message sent %f KB ".formatted((double) written / (1 << 10)));
@@ -154,26 +156,29 @@ public class MessagePacker {
         return written;
     }
 
-    private int flush(InputStream stream)
+    private int flush(EncodeStrategy strategy)
             throws ExecutionException, InterruptedException, IOException {
         int written = 0;
 
         if (socket != null) {
-            for (byte[] bytes; (bytes = stream.readNBytes(Config.SOCKET_BUFFER_SIZE)).length != 0; ) {
+            for (byte[] bytes ; (bytes = strategy.readBytes()).length != 0; ) {
+                bb.clear();
+                bb.put(bytes);
+                bb.flip();
                 try {
-                    var future = socket.write(
-                            ByteBuffer.wrap(bytes)
-                    );
-                    int delta = future.get();
-                    assert Log.testExpect("Bytes sent", bytes.length, delta);
-                    written += delta;
+                    for (int cur = 0, delta; cur < bb.limit(); cur += delta) {
+                        bb.position(cur);
+                        var future = socket.write(bb);
+                        delta = future.get();
+                    }
+                    written += bb.limit();
                 } catch (WritePendingException e) {
                     e.printStackTrace();
                 }
             }
         } else {
             assert byteArrayQueue != null;
-            byte[] bytes = stream.readAllBytes();
+            byte[] bytes = strategy.readAllBytes();
             byteArrayQueue.offer(bytes);
             written = bytes.length;
         }

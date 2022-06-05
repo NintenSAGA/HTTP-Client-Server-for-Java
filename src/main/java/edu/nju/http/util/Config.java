@@ -45,7 +45,7 @@ public class Config {
 
     public final static int DEFAULT_TIMEOUT         = 10000;
     public final static boolean DEFAULT_KEEP_ALIVE  = false;
-    public final static int SOCKET_BUFFER_SIZE      = 1 << 30;
+    public final static int SOCKET_BUFFER_SIZE      = 1 << 20;
 
     private static Path getPath(String resource) {
         URL url = ClassLoader.getSystemClassLoader().getResource(resource);

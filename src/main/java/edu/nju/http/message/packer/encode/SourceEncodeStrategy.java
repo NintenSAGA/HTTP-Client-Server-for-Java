@@ -1,5 +1,7 @@
 package edu.nju.http.message.packer.encode;
 
+import edu.nju.http.util.Config;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +11,7 @@ public class SourceEncodeStrategy extends EncodeStrategy {
     InputStream inputStream;
 
     private SourceEncodeStrategy(){
-        inputStream = new ByteArrayInputStream(new byte[0]);
+        this.inputStream = new ByteArrayInputStream(new byte[0]);
     }
 
     public SourceEncodeStrategy(InputStream inputStream) {
@@ -23,7 +25,7 @@ public class SourceEncodeStrategy extends EncodeStrategy {
 
     @Override
     public byte[] readBytes() throws IOException {
-        return inputStream.readAllBytes();
+        return inputStream.readNBytes(Config.SOCKET_BUFFER_SIZE);
     }
 
     @Override

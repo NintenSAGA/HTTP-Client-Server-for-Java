@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import static edu.nju.http.message.consts.Headers.CONTENT_LENGTH;
 
+@Deprecated
 public class TransContentLengthEncodeStrategy extends EncodeStrategy {
     private ByteArrayInputStream bis;
 
