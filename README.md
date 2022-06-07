@@ -25,7 +25,14 @@
 | Build | `org.json`          | `json`                 | `20220320` |
 | Test  | `org.junit.jupiter` | `junit-jupiter-engine` | `5.8.2`    |
 
-## 1.3 运行方式
+## 1.3 构建与运行
+
+### 1.3.1 构建
+
+- HttpClient: `mvn package -Pclient`
+- HttpServer: `mvn package -Pserver`
+
+### 1.3.2 运行
 
 最终产品为 jar 文件，通过 `java -jar [NAME].jar` 运行。
 
@@ -55,9 +62,11 @@ Data
 ```
 SYNOPSIS
     ~   [-a <ADDRESS>] [-p <PORT>] [--keep-alive]
-        [-t <TIMEOUT>]
+        [-t <TIMEOUT>] [--help]
         
 OPTIONS
+    --help          Show this help information.
+
     -a <ADDRESS>    Bind the server to the specified IPv4 address.
                     The default value is 127.0.0.1
     
@@ -106,24 +115,26 @@ SERVER: The server is now running
 SYNOPSIS
     ~   <URL>
         [-m <METHOD>] [--keep-alive] [-b <text>]
-        [-h <headers>...]
-
+        [-h <headers>...] [--help]
+        
 URL
     Using the generic URI syntax of:
     http://<HOSTNAME>[:PORT][/PATH][?QUERY]
-
+    e.g.: http://jyywiki.cn/OS/2020/, http://127.0.0.1:8080/help/, http://www.google.com/search?q=uri
     The default value of the port number is 80.
     Only support HTTP protocol (not HTTPS).
-
+    
 OPTIONS
+    --help          Show this help information.
+
     -m <METHOD>     Send with the specified web method.
                     Only supports GET and POST.
                     The default value is GET.
-
-    --keep-alive    Enable keep-alive.ß
-
+                    
+    --keep-alive    Enable keep-alive.
+    
     -b <text>       Plain text body.
-
+    
     -h <header>...  Send with the specified headers.
                     Syntax: <key>:<value>
                     e.g.: User-Agent:AbaAba/0.1

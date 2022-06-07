@@ -13,7 +13,7 @@ public class ClientDriver {
             SYNOPSIS
                 ~   <URL>
                     [-m <METHOD>] [--keep-alive] [-b <text>]
-                    [-h <headers>...]
+                    [-h <headers>...] [--help]
                     
             URL
                 Using the generic URI syntax of:
@@ -23,6 +23,8 @@ public class ClientDriver {
                 Only support HTTP protocol (not HTTPS).
                 
             OPTIONS
+                --help          Show this help information.
+            
                 -m <METHOD>     Send with the specified web method.
                                 Only supports GET and POST.
                                 The default value is GET.
@@ -72,6 +74,11 @@ public class ClientDriver {
                     case "-b" -> body = ai.next();
 
                     case "-h" -> headers = ai.nextValues();
+
+                    case "--help" -> {
+                        System.err.println(HELP);
+                        return;
+                    }
 
                     default -> throw new InvalidCommandException("Invalid token at \"%s\"".formatted(opt));
                 }

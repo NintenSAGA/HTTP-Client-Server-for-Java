@@ -8,9 +8,11 @@ public class ServerDriver {
     public static final String HELP = """
             SYNOPSIS
                 ~   [-a <ADDRESS>] [-p <PORT>] [--keep-alive]
-                    [-t <TIMEOUT>]
+                    [-t <TIMEOUT>] [--help]
                     
             OPTIONS
+                --help          Show this help information.
+            
                 -a <ADDRESS>    Bind the server to the specified IPv4 address.
                                 The default value is 127.0.0.1
                 
@@ -36,9 +38,18 @@ public class ServerDriver {
                 String opt = ai.next();
                 switch (opt) {
                     case "-a" -> hostname = ai.next();
+
                     case "-p" -> port = Integer.parseInt(ai.next());
+
                     case "--keep-alive" -> keepAlive = true;
+
                     case "-t" -> timeout = Integer.parseInt(ai.next());
+
+                    case "--help" -> {
+                        System.err.println(HELP);
+                        return;
+                    }
+
                     default -> throw new InvalidCommandException("Invalid token at \"%s\"".formatted(opt));
                 }
             }
