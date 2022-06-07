@@ -19,11 +19,11 @@
 
 ## 1.2 依赖
 
-| Scope | GroupId             | ArtifactId             | Version    |
-| ----- | ------------------- | ---------------------- | ---------- |
-| Build | `org.projectlombok` | `lombok`               | `1.18.22`  |
-| Build | `org.json`          | `json`                 | `20220320` |
-| Test  | `org.junit.jupiter` | `junit-jupiter-engine` | `5.8.2`    |
+| Scope    | GroupId             | ArtifactId             | Version    |
+|----------| ------------------- | ---------------------- | ---------- |
+| Provided | `org.projectlombok` | `lombok`               | `1.18.22`  |
+| Compile  | `org.json`          | `json`                 | `20220320` |
+| Test     | `org.junit.jupiter` | `junit-jupiter-engine` | `5.8.2`    |
 
 ## 1.3 构建与运行
 
