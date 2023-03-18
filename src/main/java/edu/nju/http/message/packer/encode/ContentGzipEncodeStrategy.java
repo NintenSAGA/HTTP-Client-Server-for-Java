@@ -9,43 +9,43 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
 public class ContentGzipEncodeStrategy extends EncodeStrategy {
-    ByteArrayInputStream inputStream;
+  ByteArrayInputStream inputStream;
 
-    private void prepare() throws IOException {
-        if (inputStream != null) return;
+  private void prepare() throws IOException {
+    if (inputStream != null) return;
 
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(
-                    outputStream
-            )) {
-                byte[] bytes = upper.readAllBytes();
-                gzipOutputStream.write(bytes, 0, bytes.length);
-                gzipOutputStream.finish();
-            }
-            inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-        }
+    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+      try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(
+          outputStream
+      )) {
+        byte[] bytes = upper.readAllBytes();
+        gzipOutputStream.write(bytes, 0, bytes.length);
+        gzipOutputStream.finish();
+      }
+      inputStream = new ByteArrayInputStream(outputStream.toByteArray());
     }
+  }
 
-    @Override
-    public byte[] readAllBytes() throws IOException {
-        prepare();
-        return inputStream.readAllBytes();
-    }
+  @Override
+  public byte[] readAllBytes() throws IOException {
+    prepare();
+    return inputStream.readAllBytes();
+  }
 
-    @Override
-    public byte[] readBytes() throws IOException {
-        return inputStream.readNBytes(Config.GZIP_MAXSIZE);
-    }
+  @Override
+  public byte[] readBytes() throws IOException {
+    return inputStream.readNBytes(Config.GZIP_MAXSIZE);
+  }
 
-    @Override
-    protected byte[] readNBytes(int n) throws IOException {
-        prepare();
-        return inputStream.readNBytes(n);
-    }
+  @Override
+  protected byte[] readNBytes(int n) throws IOException {
+    prepare();
+    return inputStream.readNBytes(n);
+  }
 
-    @Override
-    protected void headerEditing() throws IOException {
-        inputStream = null;
-        headers.put(Headers.CONTENT_ENCODING, Headers.GZIP);
-    }
+  @Override
+  protected void headerEditing() throws IOException {
+    inputStream = null;
+    headers.put(Headers.CONTENT_ENCODING, Headers.GZIP);
+  }
 }

@@ -4,9 +4,9 @@ import edu.nju.http.message.ResponseMessageFactory;
 
 
 public abstract class TargetSet {
-    protected static final ResponseMessageFactory factory;
+  protected static final ResponseMessageFactory factory;
 
-    static {
-        factory = ResponseMessageFactory.getInstance();
-    }
+  static {
+    factory = ResponseMessageFactory.getInstance();
+  }
 }

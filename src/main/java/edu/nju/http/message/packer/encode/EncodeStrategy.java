@@ -4,25 +4,25 @@ import java.io.IOException;
 import java.util.Map;
 
 public abstract class EncodeStrategy {
-    protected EncodeStrategy upper;
-    protected Map<String, String> headers;
+  protected EncodeStrategy upper;
+  protected Map<String, String> headers;
 
-    public EncodeStrategy connect(Map<String, String> headers, EncodeStrategy upper)
-            throws IOException {
-        this.headers = headers;
-        this.upper = upper;
+  public EncodeStrategy connect(Map<String, String> headers, EncodeStrategy upper)
+      throws IOException {
+    this.headers = headers;
+    this.upper = upper;
 
-        headerEditing();
+    headerEditing();
 
-        return this;
-    }
+    return this;
+  }
 
-    public abstract byte[] readAllBytes() throws IOException;
+  public abstract byte[] readAllBytes() throws IOException;
 
-    public abstract byte[] readBytes() throws IOException;
+  public abstract byte[] readBytes() throws IOException;
 
-    protected abstract byte[] readNBytes(int n) throws IOException;
+  protected abstract byte[] readNBytes(int n) throws IOException;
 
-    protected abstract void headerEditing() throws IOException;
+  protected abstract void headerEditing() throws IOException;
 
 }
